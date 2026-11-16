@@ -219,6 +219,7 @@ let view="home",day=hoje(),sub={},RES={},mostraCanc=false,PERS={},cfgMode=false;
 const equipe=()=>["criador","gerente","atendente"].includes(ME.tipo);
 const gestao=()=>["criador","gerente"].includes(ME.tipo);
 const fin=()=>["criador","gerente","financeiro"].includes(ME.tipo);
+const agGer=()=>ME.tipo==="agencia"&&ME.gerente_agencia===true;
 const agNome=id=>{const a=AGS.find(x=>x.id===id);return a?a.nome_fantasia:"—"};
 
 /* ================= Modal ================= */
@@ -294,8 +295,8 @@ async function carregaBase(){
   HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario");
 }
 const GEST=[["home","Home"],["agenda","Mapa de vagas"],["Reservas",[["reservas","Listar reservas"],["registros","Lista de registros"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_tarifa","Tarifário"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ag_cad","Cadastrar agências"],["ags","Lista de agências"]]]];
-const MENU={criador:GEST,gerente:GEST,financeiro:[["home","Home"],["Reservas",[["reservas","Listar reservas"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ags","Lista de agências"]]]],atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Buscar reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"],["mp","Multiponto"]]};
-const navHtml=()=>MENU[ME.tipo].map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
+const MENU={criador:GEST,gerente:GEST,financeiro:[["home","Home"],["Reservas",[["reservas","Listar reservas"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ags","Lista de agências"]]]],atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Buscar reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"]],agenciaGer:[["home","Home"],["reservas","Buscar reservas"],["Financeiro",[["a_cc","Conta corrente"],["a_fat","Faturas"],["mp","Multiponto"]]],["a_usr","Usuários"]]};
+const navHtml=()=>MENU[agGer()?"agenciaGer":ME.tipo].map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
   $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
   aplicaPers();
@@ -481,7 +482,7 @@ async function vEstat(){
 /* ================= Financeiro ================= */
 async function vFaturas(){
   const f=await rest("faturas?select=*&order=numero.desc&limit=200");
-  $("#main").innerHTML=`<h2>Listar faturas</h2><div class="msg" id="msg"></div>`+(f.length?tab(["Nº","Emissão","Agência","Total","Status",""],f.map(x=>[x.numero,brd(x.data_emissao),esc(agNome(x.agencia_id)),brl(x.valor_total),`<span class="st st-${x.status}">${x.status}</span>`,`<span class="ac"><button data-a="verFat" data-id="${x.id}" data-n="${x.numero}">Reservas</button>${x.status==="aberta"?`<button data-a="fatPaga" data-id="${x.id}">Marcar paga</button>`:""}</span>`])):vazio("Nenhuma fatura gerada."));
+  $("#main").innerHTML=`<h2>Listar faturas</h2><div class="msg" id="msg"></div>`+(f.length?tab(["Nº","Emissão","Agência","Total","Status",""],f.map(x=>[x.numero,brd(x.data_emissao),esc(agNome(x.agencia_id)),brl(x.valor_total),`<span class="st st-${x.status}">${x.status}</span>`,`<span class="ac"><button data-a="verFat" data-id="${x.id}" data-n="${x.numero}">Reservas</button>${x.status==="aberta"&&fin()?`<button data-a="fatPaga" data-id="${x.id}">Marcar paga</button>`:""}</span>`])):vazio("Nenhuma fatura gerada."));
 }
 async function vGerar(){
   const s=await rest("saldo_por_agencia?select=*&order=nome_fantasia");
@@ -527,6 +528,18 @@ async function vCC(){
   }
   $("#main").innerHTML=`<h2>Conta corrente</h2><div class="bar"><label>Agência<select id="ccsel">${optAg(ag,"Selecione")}</select></label></div><div class="msg" id="msg"></div>${corpo}`;
   $("#ccsel").onchange=e=>{sub.ccag=e.target.value;go("f_cc")};
+}
+async function vACC(){
+  const ag=ME.agencia_id;
+  const [s,l]=await Promise.all([rest("saldo_por_agencia?select=*&agencia_id=eq."+ag),rest("lancamentos?select=*&agencia_id=eq."+ag+"&order=criado_em.desc&limit=300")]);
+  const x=s[0]||{debitos:0,creditos:0,saldo:0,vencido:0};const T={debito:"Débito",credito:"Crédito",estorno:"Estorno"};
+  $("#main").innerHTML=`<h2>Conta corrente</h2><div class="kpis">${kpi("Débitos",brl(x.debitos))}${kpi("Créditos",brl(x.creditos))}${kpi("Saldo",brl(x.saldo))}${kpi("Vencido",brl(x.vencido))}</div>`+
+  (l.length?tab(["Data","Descrição","Vencimento","Débito","Crédito"],l.map(z=>[brd(z.criado_em),`${T[z.tipo]} — ${esc(z.descricao||"")}`,brd(z.vencimento),z.tipo==="debito"?brl(z.valor):"",z.tipo==="debito"?"":brl(z.valor)])):vazio("Sem lançamentos."));
+}
+async function vAUsr(){
+  const us=await rest("usuarios?select=*&agencia_id=eq."+ME.agencia_id+"&order=nome");RES.us=Object.fromEntries(us.map(u=>[u.id,u]));
+  $("#main").innerHTML=`<h2>Usuários da agência</h2><div class="msg" id="msg"></div><div class="atalhos"><button class="pri" data-a="aNovoUsr">+ Novo usuário</button></div>`+
+  tab(["Nome","E-mail (login)","Nível","Status",""],us.map(u=>[esc(u.nome),esc(u.email),u.gerente_agencia?"Gerente":"Usuário",`<span class="st st-${u.ativo?"ativa":"inativa"}">${u.ativo?"ativo":"desativado"}</span>`,u.gerente_agencia?"":`<span class="ac"><button data-a="usSenha" data-id="${u.id}">Nova senha</button><button data-a="usAtivo" data-id="${u.id}" data-v="${u.ativo}">${u.ativo?"Desativar":"Ativar"}</button></span>`]));
 }
 async function vMpConf(){
   const rc=await rest("recebimentos_mp?select=*,reservas(numero,turista)&order=criado_em.desc&limit=100");
@@ -620,12 +633,12 @@ function vcUsuarios(){
 async function vcUcad(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
   const tipos=ME.tipo==="criador"?["agencia","atendente","financeiro","gerente","criador"]:["agencia","atendente","financeiro"];
-  $("#main").innerHTML=cfgTop("c_ucad")+`<div class="card"><form id="cf" class="fm"><label>Nome<input name="n" required autocomplete="off"></label><label>E-mail (será o login)<input name="e" type="email" required autocomplete="off"></label><label>Nível<select name="t" id="ut">${tipos.map(t=>`<option value="${t}">${NIVEL[t]}</option>`).join("")}</select></label><label id="ual">Agência<select name="a" id="ua">${optAg("")}</select></label><label>Senha (mín. 8)<input name="s" type="password" minlength="8" autocomplete="new-password" required></label><label>Confirmar senha<input name="s2" type="password" autocomplete="new-password" required></label><p class="err" id="merr"></p><button class="pri">Cadastrar</button></form></div>`;
-  const sy=()=>{$("#ual").style.display=$("#ut").value==="agencia"?"":"none"};$("#ut").onchange=sy;sy();
+  $("#main").innerHTML=cfgTop("c_ucad")+`<div class="card"><form id="cf" class="fm"><label>Nome<input name="n" required autocomplete="off"></label><label>E-mail (será o login)<input name="e" type="email" required autocomplete="off"></label><label>Nível<select name="t" id="ut">${tipos.map(t=>`<option value="${t}">${NIVEL[t]}</option>`).join("")}</select></label><label id="ual">Agência<select name="a" id="ua">${optAg("")}</select></label><label class="chk" id="ugg"><input type="checkbox" name="gg"> Gerente da agência (financeiro, multiponto e usuários)</label><label>Senha (mín. 8)<input name="s" type="password" minlength="8" autocomplete="new-password" required></label><label>Confirmar senha<input name="s2" type="password" autocomplete="new-password" required></label><p class="err" id="merr"></p><button class="pri">Cadastrar</button></form></div>`;
+  const sy=()=>{const v=$("#ut").value==="agencia"?"":"none";$("#ual").style.display=v;($("#ugg")||{style:{}}).style.display=v};$("#ut").onchange=sy;sy();
   $("#cf").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),t=f.get("t");
     if(f.get("s")!==f.get("s2"))return $("#merr").textContent="As senhas não conferem.";
     if(t==="agencia"&&!f.get("a"))return $("#merr").textContent="Escolha a agência do usuário.";
-    try{await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:t,agencia_id:t==="agencia"?f.get("a"):null});e.target.reset();sy();$("#merr").textContent="";msg("Usuário cadastrado.")}catch(er){$("#merr").textContent=er.message}};
+    try{await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:t,agencia_id:t==="agencia"?f.get("a"):null,gerente_agencia:t==="agencia"&&!!f.get("gg")});e.target.reset();sy();$("#merr").textContent="";msg("Usuário cadastrado.")}catch(er){$("#merr").textContent=er.message}};
 }
 async function vcUlist(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
@@ -636,7 +649,7 @@ async function vcUlista(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
   const fa=sub.ufa||"";
   const us=await rest("usuarios?select=*&order=nome"+(fa?"&agencia_id=eq."+fa:""));
-  $("#main").innerHTML=cfgTop("c_ulista")+`<p class="sub">${fa?"Agência: "+esc(agNome(fa)):"Todas as agências"}</p>`+(us.length?tab(["Nome","E-mail (login)","Nível","Agência","Status",""],us.map(u=>[`<button class="lnk" data-a="uedit" data-id="${u.id}">${esc(u.nome)}</button>`,esc(u.email),NIVEL[u.tipo],u.agencia_id?esc(agNome(u.agencia_id)):"—",`<span class="st st-${u.ativo?"ativa":"inativa"}">${u.ativo?"ativo":"desativado"}</span>`,`<span class="ac"><button data-a="uedit" data-id="${u.id}">Editar</button></span>`])):vazio("Nenhum usuário encontrado para este filtro."));
+  $("#main").innerHTML=cfgTop("c_ulista")+`<p class="sub">${fa?"Agência: "+esc(agNome(fa)):"Todas as agências"}</p>`+(us.length?tab(["Nome","E-mail (login)","Nível","Agência","Status",""],us.map(u=>[`<button class="lnk" data-a="uedit" data-id="${u.id}">${esc(u.nome)}</button>`,esc(u.email),NIVEL[u.tipo]+(u.gerente_agencia?" (gerente)":""),u.agencia_id?esc(agNome(u.agencia_id)):"—",`<span class="st st-${u.ativo?"ativa":"inativa"}">${u.ativo?"ativo":"desativado"}</span>`,`<span class="ac"><button data-a="uedit" data-id="${u.id}">Editar</button></span>`])):vazio("Nenhum usuário encontrado para este filtro."));
 }
 async function vcUedit(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
@@ -646,15 +659,15 @@ async function vcUedit(){
   $("#main").innerHTML=cfgTop("c_uedit")+`<div class="card"><form id="cf" class="fm"><p>E-mail (login): <b>${esc(u.email)}</b></p>
   <label>Nome<input name="n" value="${esc(u.nome)}" required></label>
   <label>Nível${podeTipo?`<select name="t" id="ut">${["agencia","atendente","financeiro","gerente","criador"].map(t=>`<option value="${t}"${t===u.tipo?" selected":""}>${NIVEL[t]}</option>`).join("")}</select>`:`<input value="${NIVEL[u.tipo]}" disabled><input type="hidden" name="t" id="ut" value="${u.tipo}">`}</label>
-  <label id="ual">Agência<select name="a">${optAg(u.agencia_id)}</select></label>
+  <label id="ual">Agência<select name="a">${optAg(u.agencia_id)}</select></label><label class="chk" id="ugg"><input type="checkbox" name="gg"${u.gerente_agencia?" checked":""}> Gerente da agência (financeiro, multiponto e usuários)</label>
   <label>Status<select name="st"${u.id===ME.id?" disabled":""}><option value="1"${u.ativo?" selected":""}>Ativo</option><option value="0"${u.ativo?"":" selected"}>Desativado</option></select></label>
   <label>Nova senha (opcional, mín. 8)<input name="s" type="password" minlength="8" autocomplete="new-password"></label><label>Confirmar nova senha<input name="s2" type="password" autocomplete="new-password"></label>
   <p class="err" id="merr"></p><button class="pri">Salvar</button></form></div>`;
-  const sy=()=>{$("#ual").style.display=$("#ut").value==="agencia"?"":"none"};$("#ut").onchange=sy;sy();
+  const sy=()=>{const v=$("#ut").value==="agencia"?"":"none";$("#ual").style.display=v;($("#ugg")||{style:{}}).style.display=v};$("#ut").onchange=sy;sy();
   $("#cf").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),t=f.get("t");
     if(f.get("s")&&f.get("s")!==f.get("s2"))return $("#merr").textContent="As senhas não conferem.";
     if(t==="agencia"&&!f.get("a"))return $("#merr").textContent="Escolha a agência do usuário.";
-    const o={nome:f.get("n").trim(),tipo:t,agencia_id:t==="agencia"?f.get("a"):null};
+    const o={nome:f.get("n").trim(),tipo:t,agencia_id:t==="agencia"?f.get("a"):null,gerente_agencia:t==="agencia"&&!!f.get("gg")};
     if(u.id!==ME.id)o.ativo=f.get("st")==="1";
     try{await upd("usuarios","id=eq."+u.id,o);if(f.get("s"))await fnUsr({acao:"senha",id:u.id,senha:f.get("s")});msg("Usuário salvo.")}catch(er){$("#merr").textContent=er.message}};
 }
@@ -671,7 +684,7 @@ async function vHomeAg(){
   <div class="msg" id="msg"></div>${dias}`;
   $("#hs").onsubmit=e=>{e.preventDefault();sub={ini:somaDias(hoje(),-365),fim:somaDias(hoje(),365),q:new FormData(e.target).get("q").trim()};go("reservas")};
 }
-const VIEWS={home:()=>fin()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
+const VIEWS={home:()=>fin()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,a_cc:vACC,a_fat:vFaturas,a_usr:vAUsr,
   f_faturas:vFaturas,f_gerar:vGerar,f_valor:vValor,f_tarifa:vTarifa,f_saldos:vSaldos,f_vendas:vVendas,f_cc:vCC,f_mp:vMpConf,
   ag_cad:vAgCad,ags:vAgs,ag_rel:vAgRel,
   c_menu:vcMenu,c_tema:vcTema,c_limite:vcLimite,c_atv:vcAtv,c_alertas:vcAlertas,c_pers:vcPers,c_horarios:vcHorarios,c_usuarios:vcUsuarios,c_ucad:vcUcad,c_ulist:vcUlist,c_ulista:vcUlista,c_uedit:vcUedit};
@@ -734,10 +747,11 @@ const A={
   /* usuários */
   usNovo:()=>{const tipos=ME.tipo==="criador"?["agencia","atendente","gerente","criador"]:["agencia","atendente"];
     ask("Novo usuário",`<label>Nome<input name="n" required></label><label>E-mail (será o login)<input name="e" type="email" required></label><label>Senha provisória (mín. 8)<input name="s" type="text" minlength="8" required></label><label>Nível<select name="t" id="ut">${tipos.map(t=>`<option value="${t}">${NIVEL[t]}</option>`).join("")}</select></label><label id="ual">Agência<select name="a" id="ua"><option value="">Selecione</option>${AGS.map(a=>`<option value="${a.id}">${esc(a.nome_fantasia)}</option>`).join("")}</select></label>`,"Criar usuário",async f=>{
-      const t=f.get("t");await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:t,agencia_id:t==="agencia"?f.get("a"):null});go("usr")},()=>{const sy=()=>{$("#ual").style.display=$("#ut").value==="agencia"?"":"none"};$("#ut").onchange=sy;sy()})},
+      const t=f.get("t");await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:t,agencia_id:t==="agencia"?f.get("a"):null});go("usr")},()=>{const sy=()=>{const v=$("#ut").value==="agencia"?"":"none";$("#ual").style.display=v;($("#ugg")||{style:{}}).style.display=v};$("#ut").onchange=sy;sy()})},
   usAg:d=>ask("Alterar agência do usuário",`<label>Agência${sel("a",AGS.map(a=>`<option value="${a.id}"${a.id===RES.us[d.id].agencia_id?" selected":""}>${esc(a.nome_fantasia)}</option>`).join(""))}</label>`,"Salvar",async f=>{await upd("usuarios","id=eq."+d.id,{agencia_id:f.get("a")});go("usr")}),
+  aNovoUsr:()=>ask("Novo usuário da agência",`<label>Nome<input name="n" required></label><label>E-mail (será o login)<input name="e" type="email" required></label><label>Senha provisória (mín. 8)<input name="s" type="text" minlength="8" required></label>`,"Criar usuário",async f=>{await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:"agencia",agencia_id:ME.agencia_id});go("a_usr")}),
   usSenha:d=>ask("Nova senha para "+esc(RES.us[d.id].nome),`<label>Senha (mín. 8)<input name="s" type="text" minlength="8" required></label>`,"Salvar",async f=>{await fnUsr({acao:"senha",id:d.id,senha:f.get("s")})}),
-  usAtivo:async d=>{try{await fnUsr({acao:"ativo",id:d.id,ativo:d.v!=="true"});go("usr")}catch(e){msg(e.message,1)}},
+  usAtivo:async d=>{try{await fnUsr({acao:"ativo",id:d.id,ativo:d.v!=="true"});go(agGer()?"a_usr":"usr")}catch(e){msg(e.message,1)}},
 
   /* configurações */
   salvaHor:async()=>{try{const mud=[...document.querySelectorAll("[data-h]")].filter(c=>c.checked!==HOR.find(h=>h.id===c.dataset.h).ativo);await Promise.all(mud.map(c=>upd("horarios_operacao","id=eq."+c.dataset.h,{ativo:c.checked})));msg(mud.length?"Horários salvos.":"Nada mudou.");HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario")}catch(e){msg(e.message,1)}},
