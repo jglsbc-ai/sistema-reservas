@@ -172,7 +172,7 @@ const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+Stri
 const hoje=()=>ymd(new Date());
 const somaDias=(s,n)=>{const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return ymd(d)};
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
-const NIVEL={criador:"Criador",gerente:"Gerente",atendente:"Atendente",agencia:"Agência"};
+const NIVEL={criador:"Criador",gerente:"Gerente",atendente:"Atendente",financeiro:"Financeiro",agencia:"Agência"};
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 
 function traduz(m){
@@ -218,6 +218,7 @@ let ME=null,ATV=null,HOR=[],AGS=[],CFGAL={ativo:true,som:true,intervalo_segundos
 let view="home",day=hoje(),sub={},RES={},mostraCanc=false,PERS={},cfgMode=false;
 const equipe=()=>["criador","gerente","atendente"].includes(ME.tipo);
 const gestao=()=>["criador","gerente"].includes(ME.tipo);
+const fin=()=>["criador","gerente","financeiro"].includes(ME.tipo);
 const agNome=id=>{const a=AGS.find(x=>x.id===id);return a?a.nome_fantasia:"—"};
 
 /* ================= Modal ================= */
@@ -293,7 +294,7 @@ async function carregaBase(){
   HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario");
 }
 const GEST=[["home","Home"],["agenda","Mapa de vagas"],["Reservas",[["reservas","Listar reservas"],["registros","Lista de registros"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_tarifa","Tarifário"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ag_cad","Cadastrar agências"],["ags","Lista de agências"]]]];
-const MENU={criador:GEST,gerente:GEST,atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Buscar reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"],["mp","Multiponto"]]};
+const MENU={criador:GEST,gerente:GEST,financeiro:[["home","Home"],["Reservas",[["reservas","Listar reservas"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ags","Lista de agências"]]]],atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Buscar reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"],["mp","Multiponto"]]};
 const navHtml=()=>MENU[ME.tipo].map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
   $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
@@ -322,6 +323,7 @@ function podeAgir(r){
 }
 function acoes(r){
   RES[r.id]=r;
+  if(ME.tipo==="financeiro")return "";
   if(r.status==="cancelada")return "";
   if(!podeAgir(r))return `<span class="lock">🔒 somente consulta — peça alteração ao atrativo</span>`;
   const b=[];
@@ -354,7 +356,7 @@ async function vAgenda(){
 /* ================= Lista / busca ================= */
 async function vReservas(){
   sub.ini=sub.ini||somaDias(hoje(),-30);sub.fim=sub.fim||somaDias(hoje(),60);sub.q=sub.q||"";
-  $("#main").innerHTML=`<h2>${gestao()?"Reservas":"Buscar reservas"}</h2>
+  $("#main").innerHTML=`<h2>${(ME.tipo==="agencia"||ME.tipo==="atendente")?"Buscar reservas":"Reservas"}</h2>
   <form class="bar" id="bf"><label>De<input type="date" id="bi" value="${sub.ini}" required></label><label>Até<input type="date" id="bfim" value="${sub.fim}" required></label><label>Nome ou nº<input id="bq" value="${esc(sub.q)}" placeholder="turista ou número"></label><button class="pri">Buscar</button></form>
   <div class="msg" id="msg"></div><div id="res"></div>`;
   $("#bf").onsubmit=e=>{e.preventDefault();sub.ini=$("#bi").value;sub.fim=$("#bfim").value;sub.q=$("#bq").value;lista()};
@@ -362,7 +364,7 @@ async function vReservas(){
 }
 async function lista(){
   const rs=await rpc("buscar_reservas",{p_inicio:sub.ini,p_fim:sub.fim,p_busca:sub.q||null});
-  $("#res").innerHTML=rs.length?`<div class="scroll"><table class="tb"><thead><tr><th>Nº</th><th>Data</th><th>Hora</th><th>Turista</th>${equipe()?"<th>Agência</th>":""}<th>Pax</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead><tbody>${rs.map(r=>`<tr><td>${r.numero}</td><td>${brd(r.data)}</td><td>${hh(r.horario)}</td><td>${esc(r.turista)}</td>${equipe()?`<td>${esc(agNome(r.agencia_id))}</td>`:""}<td>${r.adultos}+${r.criancas}+${r.cortesias}</td><td class="num">${brl(r.valor_total)}</td><td><span class="st st-${r.status}">${r.status}</span></td><td class="ac">${acoes(r)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhuma reserva encontrada.</p>`;
+  $("#res").innerHTML=rs.length?`<div class="scroll"><table class="tb"><thead><tr><th>Nº</th><th>Data</th><th>Hora</th><th>Turista</th>${ME.tipo!=="agencia"?"<th>Agência</th>":""}<th>Pax</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead><tbody>${rs.map(r=>`<tr><td>${r.numero}</td><td>${brd(r.data)}</td><td>${hh(r.horario)}</td><td>${esc(r.turista)}</td>${ME.tipo!=="agencia"?`<td>${esc(agNome(r.agencia_id))}</td>`:""}<td>${r.adultos}+${r.criancas}+${r.cortesias}</td><td class="num">${brl(r.valor_total)}</td><td><span class="st st-${r.status}">${r.status}</span></td><td class="ac">${acoes(r)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhuma reserva encontrada.</p>`;
 }
 
 /* ================= Multiponto ================= */
@@ -408,12 +410,12 @@ const fnUsr=b=>http("/functions/v1/gerenciar-usuarios",{method:"POST",body:b});
 
 /* ================= Home (painel) ================= */
 async function vHome(){
-  const d=hoje(),g=gestao();
+  const d=hoje(),g=gestao(),f=fin(),ops=ME.tipo!=="financeiro";
   const [vagas,res,sal,mes,aud]=await Promise.all([
-    rpc("vagas_do_dia",{p_atividade:ATV.id,p_data:d}),
+    ops?rpc("vagas_do_dia",{p_atividade:ATV.id,p_data:d}):[],
     rest(`reservas?select=*&atividade_id=eq.${ATV.id}&data=eq.${d}&status=neq.cancelada&order=horario,numero`),
-    g?rest("saldo_por_agencia?select=*&order=nome_fantasia"):[],
-    g?rest(`reservas?select=agencia_id,valor_total&data=gte.${mesIni()}&data=lte.${mesFim()}&status=neq.cancelada&limit=5000`):[],
+    f?rest("saldo_por_agencia?select=*&order=nome_fantasia"):[],
+    f?rest(`reservas?select=agencia_id,valor_total&data=gte.${mesIni()}&data=lte.${mesFim()}&status=neq.cancelada&limit=5000`):[],
     g?rest("auditoria?select=em,tabela,acao,depois,antes&order=em.desc&limit=8"):[]]);
   res.forEach(r=>RES[r.id]=r);
   const ab=vagas.filter(v=>v.ativo).sort((a,b)=>String(a.horario).localeCompare(String(b.horario)));
@@ -426,15 +428,17 @@ async function vHome(){
   const penH=pen.length?pen.slice(0,6).map(r=>`<div class="li"><span><b>${hh(r.horario)}</b> · ${esc(agNome(r.agencia_id))} · ${esc(r.turista)} · ${qt(r)} pessoa(s)</span><button class="mini" data-a="hconf" data-id="${r.id}">Confirmar</button></div>`).join("")+(pen.length>6?`<p class="more">e mais ${pen.length-6}</p>`:""):vazio("Tudo confirmado.");
   const chips=ab.map(v=>{const c=v.livres===0?"lot":v.livres<=2?"low":"ok";return `<button class="chip ${c}" data-a="nav" data-v="agenda"><b>${hh(v.horario)}</b><small>${v.livres?v.livres+" livres":"lotado"}</small></button>`}).join("");
   let h=`<p class="rdata">Painel do dia ${brd(d)}</p>
-  <div class="atalhos"><button class="pri" data-a="nova">Nova reserva</button><button class="mini" data-a="nav" data-v="agenda">Mapa de vagas</button>${g?`<button class="mini" data-a="nav" data-v="f_cc">Conta corrente</button>`:""}</div>
-  <div class="kpis">${kpi("Reservas",res.length)}${kpi("Pessoas",pes)}${kpi("Vagas livres",livres)}</div>
-  <div class="pgrid">${pcard("Próximo horário",cxProx)}${pcard("Aguardando confirmação"+(pen.length?` <span class="badge bq">${pen.length}</span>`:""),penH)}${pcard("Vagas por horário",`<div class="chips">${chips||vazio("Sem horários abertos.")}</div>`,"wide")}</div>`;
-  if(g){
+  <div class="atalhos">${ops?`<button class="pri" data-a="nova">Nova reserva</button><button class="mini" data-a="nav" data-v="agenda">Mapa de vagas</button>`:""}${f?`<button class="${ops?"mini":"pri"}" data-a="nav" data-v="f_cc">Conta corrente</button>`:""}</div>
+  ${ops?`<div class="kpis">${kpi("Reservas",res.length)}${kpi("Pessoas",pes)}${kpi("Vagas livres",livres)}</div>
+  <div class="pgrid">${pcard("Próximo horário",cxProx)}${pcard("Aguardando confirmação"+(pen.length?` <span class="badge bq">${pen.length}</span>`:""),penH)}${pcard("Vagas por horário",`<div class="chips">${chips||vazio("Sem horários abertos.")}</div>`,"wide")}</div>`:""}`;
+  if(f){
     const aRec=sal.reduce((s,x)=>s+Number(x.saldo),0),venc=sal.reduce((s,x)=>s+Number(x.vencido),0);
     const vDia=res.reduce((s,r)=>s+Number(r.valor_total),0),vMes=mes.reduce((s,r)=>s+Number(r.valor_total),0);
     const inad=sal.filter(x=>x.vencido>0).sort((x,y)=>y.vencido-x.vencido).slice(0,5);
     const inadH=inad.length?inad.map(x=>`<div class="li"><span><b>${esc(x.nome_fantasia)}</b> · ${brl(x.vencido)} vencido ${x.bloqueada?'<span class="badge bq">Bloqueada</span>':""}</span><span><button class="mini" data-a="abrirCC" data-id="${x.agencia_id}">Abrir</button> <button class="mini" data-a="bloq" data-id="${x.agencia_id}" data-b="${x.bloqueada}">${x.bloqueada?"Desbloquear":"Bloquear"}</button></span></div>`).join(""):vazio("Nenhuma agência inadimplente.");
     h+=`<p class="psec">Financeiro</p><div class="kpis">${kpi("A receber",brl(aRec))}${kpi("Vencido",brl(venc))}${kpi("Vendas do dia",brl(vDia))}${kpi("Vendas do mês",brl(vMes))}${kpi("Agências bloqueadas",sal.filter(x=>x.bloqueada).length)}</div><div class="pgrid">${pcard("Agências inadimplentes",inadH,"wide")}</div>`;
+  }
+  if(g){
     const mm={};mes.forEach(r=>{const m=mm[r.agencia_id]=mm[r.agencia_id]||{n:0,v:0};m.n++;m.v+=Number(r.valor_total)});
     const top=Object.entries(mm).sort((x,y)=>y[1].v-x[1].v).slice(0,5);
     const rec=aud.map(x=>`<div class="li"><span>${esc(labelAud(x))}</span><small>${new Date(x.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</small></div>`).join("")||vazio("Sem atividade registrada.");
@@ -615,7 +619,7 @@ function vcUsuarios(){
 }
 async function vcUcad(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
-  const tipos=ME.tipo==="criador"?["agencia","atendente","gerente","criador"]:["agencia","atendente"];
+  const tipos=ME.tipo==="criador"?["agencia","atendente","financeiro","gerente","criador"]:["agencia","atendente","financeiro"];
   $("#main").innerHTML=cfgTop("c_ucad")+`<div class="card"><form id="cf" class="fm"><label>Nome<input name="n" required autocomplete="off"></label><label>E-mail (será o login)<input name="e" type="email" required autocomplete="off"></label><label>Nível<select name="t" id="ut">${tipos.map(t=>`<option value="${t}">${NIVEL[t]}</option>`).join("")}</select></label><label id="ual">Agência<select name="a" id="ua">${optAg("")}</select></label><label>Senha (mín. 8)<input name="s" type="password" minlength="8" autocomplete="new-password" required></label><label>Confirmar senha<input name="s2" type="password" autocomplete="new-password" required></label><p class="err" id="merr"></p><button class="pri">Cadastrar</button></form></div>`;
   const sy=()=>{$("#ual").style.display=$("#ut").value==="agencia"?"":"none"};$("#ut").onchange=sy;sy();
   $("#cf").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),t=f.get("t");
@@ -641,7 +645,7 @@ async function vcUedit(){
   const podeTipo=ME.tipo==="criador"&&u.id!==ME.id;
   $("#main").innerHTML=cfgTop("c_uedit")+`<div class="card"><form id="cf" class="fm"><p>E-mail (login): <b>${esc(u.email)}</b></p>
   <label>Nome<input name="n" value="${esc(u.nome)}" required></label>
-  <label>Nível${podeTipo?`<select name="t" id="ut">${["agencia","atendente","gerente","criador"].map(t=>`<option value="${t}"${t===u.tipo?" selected":""}>${NIVEL[t]}</option>`).join("")}</select>`:`<input value="${NIVEL[u.tipo]}" disabled><input type="hidden" name="t" id="ut" value="${u.tipo}">`}</label>
+  <label>Nível${podeTipo?`<select name="t" id="ut">${["agencia","atendente","financeiro","gerente","criador"].map(t=>`<option value="${t}"${t===u.tipo?" selected":""}>${NIVEL[t]}</option>`).join("")}</select>`:`<input value="${NIVEL[u.tipo]}" disabled><input type="hidden" name="t" id="ut" value="${u.tipo}">`}</label>
   <label id="ual">Agência<select name="a">${optAg(u.agencia_id)}</select></label>
   <label>Status<select name="st"${u.id===ME.id?" disabled":""}><option value="1"${u.ativo?" selected":""}>Ativo</option><option value="0"${u.ativo?"":" selected"}>Desativado</option></select></label>
   <label>Nova senha (opcional, mín. 8)<input name="s" type="password" minlength="8" autocomplete="new-password"></label><label>Confirmar nova senha<input name="s2" type="password" autocomplete="new-password"></label>
@@ -667,7 +671,7 @@ async function vHomeAg(){
   <div class="msg" id="msg"></div>${dias}`;
   $("#hs").onsubmit=e=>{e.preventDefault();sub={ini:somaDias(hoje(),-365),fim:somaDias(hoje(),365),q:new FormData(e.target).get("q").trim()};go("reservas")};
 }
-const VIEWS={home:()=>gestao()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
+const VIEWS={home:()=>fin()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
   f_faturas:vFaturas,f_gerar:vGerar,f_valor:vValor,f_tarifa:vTarifa,f_saldos:vSaldos,f_vendas:vVendas,f_cc:vCC,f_mp:vMpConf,
   ag_cad:vAgCad,ags:vAgs,ag_rel:vAgRel,
   c_menu:vcMenu,c_tema:vcTema,c_limite:vcLimite,c_atv:vcAtv,c_alertas:vcAlertas,c_pers:vcPers,c_horarios:vcHorarios,c_usuarios:vcUsuarios,c_ucad:vcUcad,c_ulist:vcUlist,c_ulista:vcUlista,c_uedit:vcUedit};
