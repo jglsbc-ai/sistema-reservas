@@ -293,10 +293,10 @@ async function carregaBase(){
   HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario");
 }
 const GEST=[["home","Home"],["agenda","Mapa de vagas"],["Reservas",[["reservas","Listar reservas"],["registros","Lista de registros"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_tarifa","Tarifário"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ag_cad","Cadastrar agências"],["ags","Lista de agências"]]]];
-const MENU={criador:GEST,gerente:GEST,atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"],["mp","Multiponto"]]};
+const MENU={criador:GEST,gerente:GEST,atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Buscar reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"],["mp","Multiponto"]]};
 const navHtml=()=>MENU[ME.tipo].map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
-  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${ME.tipo==="agencia"?`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${esc(agNome(ME.agencia_id))}</span>`:""}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
   aplicaPers();
 }
 function montaApp(){
@@ -354,7 +354,7 @@ async function vAgenda(){
 /* ================= Lista / busca ================= */
 async function vReservas(){
   sub.ini=sub.ini||somaDias(hoje(),-30);sub.fim=sub.fim||somaDias(hoje(),60);sub.q=sub.q||"";
-  $("#main").innerHTML=`<h2>${ME.tipo==="agencia"?"Buscar reservas":"Reservas"}</h2>
+  $("#main").innerHTML=`<h2>${gestao()?"Reservas":"Buscar reservas"}</h2>
   <form class="bar" id="bf"><label>De<input type="date" id="bi" value="${sub.ini}" required></label><label>Até<input type="date" id="bfim" value="${sub.fim}" required></label><label>Nome ou nº<input id="bq" value="${esc(sub.q)}" placeholder="turista ou número"></label><button class="pri">Buscar</button></form>
   <div class="msg" id="msg"></div><div id="res"></div>`;
   $("#bf").onsubmit=e=>{e.preventDefault();sub.ini=$("#bi").value;sub.fim=$("#bfim").value;sub.q=$("#bq").value;lista()};
@@ -663,11 +663,11 @@ async function vHomeAg(){
     return `<div class="dia"><div class="dh"><b>${tit}</b><small>(${brd(d)})</small></div><div class="db">${l.length?l.map(r=>chip(r,true)).join(""):'<p class="nada">Não existem reservas!</p>'}</div></div>`;
   }).join("");
   $("#main").innerHTML=`<div class="card"><h3>Buscar reservas</h3><form id="hs" class="fr"><label>Nome do turista ou número da reserva<input name="q" required autocomplete="off"></label><label>&nbsp;<button class="pri">Buscar</button></label></form><p class="sub" style="text-align:left;margin:8px 0 0"><button type="button" class="lnk" data-a="nav" data-v="reservas">Buscar por período</button></p></div>
-  <div class="card"><h3>Consulte a disponibilidade dos passeios!</h3><div class="fr"><label>Data<input type="date" id="ad" value="${d0}" min="${d0}"></label><label>Adultos<input type="number" id="aa" min="1" inputmode="numeric"></label><label>Crianças<input type="number" id="ac" min="0" value="0" inputmode="numeric"></label></div><p style="margin:12px 0 0"><button class="pri" data-a="consultarAg">Consultar</button></p></div>
+  <div class="card"><h3>Consulte a disponibilidade dos passeios!</h3><div class="fr"><label>Data<input type="date" id="ad" value="${d0}" min="${d0}"></label><label>Adultos<input type="number" id="aa" min="1" inputmode="numeric"></label><label>Crianças<input type="number" id="ac" min="0" value="0" inputmode="numeric"></label>${equipe()?'<label>Cortesias<input type="number" id="acor" min="0" value="0" inputmode="numeric"></label>':""}</div><p style="margin:12px 0 0"><button class="pri" data-a="consultarAg">Consultar</button></p></div>
   <div class="msg" id="msg"></div>${dias}`;
   $("#hs").onsubmit=e=>{e.preventDefault();sub={ini:somaDias(hoje(),-365),fim:somaDias(hoje(),365),q:new FormData(e.target).get("q").trim()};go("reservas")};
 }
-const VIEWS={home:()=>ME.tipo==="agencia"?vHomeAg():vHome(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
+const VIEWS={home:()=>gestao()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
   f_faturas:vFaturas,f_gerar:vGerar,f_valor:vValor,f_tarifa:vTarifa,f_saldos:vSaldos,f_vendas:vVendas,f_cc:vCC,f_mp:vMpConf,
   ag_cad:vAgCad,ags:vAgs,ag_rel:vAgRel,
   c_menu:vcMenu,c_tema:vcTema,c_limite:vcLimite,c_atv:vcAtv,c_alertas:vcAlertas,c_pers:vcPers,c_horarios:vcHorarios,c_usuarios:vcUsuarios,c_ucad:vcUcad,c_ulist:vcUlist,c_ulista:vcUlista,c_uedit:vcUedit};
@@ -697,7 +697,7 @@ const A={
   notif:async()=>{$("#kd").classList.remove("open");try{const p=await Notification.requestPermission();alert(p==="granted"?"Notificações ativadas.":"Notificações não permitidas neste navegador.")}catch(e){}},
 
   consultar:()=>consultaDisp(day,+$("#adt").value||0,+$("#chd").value||0,+$("#cort").value||0,"agenda"),
-  consultarAg:()=>consultaDisp($("#ad").value,+$("#aa").value||0,+$("#ac").value||0,0,"home"),
+  consultarAg:()=>consultaDisp($("#ad").value,+$("#aa").value||0,+$("#ac").value||0,+(($("#acor")||{}).value)||0,"home"),
   status:async d=>{const r=RES[d.id];try{await upd("reservas","id=eq."+d.id,{status:r.status==="confirmada"?"pendente":"confirmada"});go(view)}catch(e){msg(e.message,1)}},
   pax:d=>{const r=RES[d.id];ask(`Reserva nº ${r.numero}: pessoas`,`<label>Adultos<input type="number" name="a" min="1" value="${r.adultos}" required></label><label>Crianças<input type="number" name="c" min="0" value="${r.criancas}"></label><label>Cortesias<input type="number" name="o" min="0" value="${r.cortesias}"></label>`,"Salvar",async f=>{await upd("reservas","id=eq."+d.id,{adultos:+f.get("a"),criancas:+f.get("c")||0,cortesias:+f.get("o")||0});go(view)})},
   mover:d=>{
