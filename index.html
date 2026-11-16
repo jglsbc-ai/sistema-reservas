@@ -94,13 +94,53 @@ dialog img{max-width:100%;border-radius:10px}
 .alerta span{flex:1}.alerta button{background:#fff;color:#b42318;border:0;border-radius:8px;padding:6px 12px;font-weight:700}
 @keyframes pulsa{50%{filter:brightness(1.2)}}
 /* login */
-.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(160deg,#0a3d1d,#16a34a 60%,#7ddba0) center/cover fixed}
+.login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:#0a3d1d url(fundo-login.jpg) center/cover no-repeat fixed}
+.login .side{display:flex;flex-direction:column;justify-content:space-between;padding:28px 32px;color:#fff;background:linear-gradient(160deg,rgba(10,61,29,.5),rgba(0,0,0,.35))}
+.lgbrand{font-weight:700;letter-spacing:.04em}
+.lgwel{border-left:3px solid #fff;padding-left:14px}.lgwel h2{color:#fff;font-size:2rem;line-height:1.1;margin:0 0 8px}.lgwel p{margin:0;opacity:.9}
+.login .main{display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.22)}
 .login .box{background:var(--card);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:26px;width:min(380px,100%)}
 .login h1{margin:0 0 4px;font-size:1.4rem}.login p{margin:0 0 14px;color:var(--muted)}
 .login label{display:block;margin:10px 0;font-size:.85rem;color:var(--muted)}
 .login input{width:100%;margin-top:2px}
 .login .pri{width:100%;margin-top:10px;padding:11px}
 .login .lk{background:none;border:0;color:var(--ac);padding:6px 0;margin-top:6px;width:100%;text-align:center}
+@media (max-width:820px){.login{grid-template-columns:1fr}.login .side{display:none}}
+/* painel e menus */
+.top .in{flex-wrap:wrap}.grow{flex:1}
+.nav{flex-wrap:wrap;overflow:visible}
+.dd{position:relative}
+.nav .drop{left:0;right:auto;top:100%}
+.top #logo{max-height:34px;max-width:120px;object-fit:contain}
+.mini{border:0;background:var(--bar);color:var(--text);border-radius:999px;padding:5px 12px}
+.mini:hover{filter:brightness(.95)}
+.badge{border-radius:999px;padding:1px 10px;font-size:.75rem}.badge.bq{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.rdata{color:var(--muted);margin:10px 0}
+.atalhos{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 16px;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.kpi{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px}
+.kpi b{display:block;font-size:1.5rem;letter-spacing:-.02em;overflow-wrap:anywhere}
+.kpi span{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:12px 0}
+.pc{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:14px 16px}
+.pc.wide{grid-column:1/-1}
+.pc h3{margin:0 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;gap:8px;align-items:center}
+.pc .vazio{text-align:left;margin:6px 0}
+.prox{display:flex;flex-direction:column;gap:8px}.prox b{font-size:2rem;letter-spacing:-.03em}.prox span{color:var(--muted);font-size:.9rem}
+.pbar{height:8px;border-radius:999px;background:var(--bar);overflow:hidden}.pbar i{display:block;height:100%;background:var(--ac);border-radius:999px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--bar);font-size:.9rem}
+.li:first-of-type{border-top:0}.li small{color:var(--muted);white-space:nowrap}
+.more{margin:6px 0 0;color:var(--muted);font-size:.85rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:78px;padding:8px 12px;border:1px solid var(--bar);border-radius:12px;background:var(--card);color:var(--text)}
+.chip small{font-size:.72rem;color:var(--muted)}.chip.ok{border-color:color-mix(in srgb,var(--ok,#16a34a) 45%,var(--bar))}.chip.low{border-color:#d97706}.chip.lot{border-color:var(--red)}.chip.lot small{color:var(--red)}
+.psec{margin:20px 0 0;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cfglist{display:flex;flex-direction:column;gap:8px;max-width:520px}
+.cfgit{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;background:var(--card);border:0;border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;color:var(--text)}
+.cfgit small{display:block;color:var(--muted)}
+.lnk{background:none;border:0;color:var(--ac);padding:0;text-decoration:underline}
+.tot{text-align:right;margin:12px 0}
+@media print{.top,.alertas,.noprint,.atalhos,.bar{display:none!important}body{background:#fff}}
 .pill{display:inline-block;border-radius:999px;background:var(--soft);color:var(--ac);padding:1px 10px;font-size:.78rem}
 </style>
 </head>
@@ -168,7 +208,7 @@ const rpc=(n,a)=>http("/rest/v1/rpc/"+n,{method:"POST",body:a||{}});
 
 /* ================= Estado ================= */
 let ME=null,ATV=null,HOR=[],AGS=[],CFGAL={ativo:true,som:true,intervalo_segundos:30,tipos:["gerente","atendente"]};
-let view="agenda",day=hoje(),sub={},RES={},mostraCanc=false;
+let view="home",day=hoje(),sub={},RES={},mostraCanc=false,PERS={},cfgMode=false;
 const equipe=()=>["criador","gerente","atendente"].includes(ME.tipo);
 const gestao=()=>["criador","gerente"].includes(ME.tipo);
 const agNome=id=>{const a=AGS.find(x=>x.id===id);return a?a.nome_fantasia:"—"};
@@ -190,7 +230,7 @@ const msg=(t,erro)=>{const m=$("#msg");if(m){m.textContent=t||"";m.className="ms
 /* ================= Login ================= */
 function telaLogin(aviso,modo){
   modo=modo||"entrar";
-  $("#app").innerHTML=`<div class="login"><div class="box">
+  $("#app").innerHTML=`<div class="login"><aside class="side"><div class="lgbrand">Sistema de reservas</div><div class="lgwel"><h2>${modo==="entrar"?"Bem-vindo":"Primeiro acesso"}</h2><p>Reservas e passeios em um só lugar.</p></div></aside><main class="main"><div class="box">
   <h1>Sistema de reservas</h1><p>${modo==="entrar"?"Entre com seu e-mail e senha":"Primeiro acesso: crie o login do Criador do sistema"}</p>
   <form id="lf">
     <label>E-mail<input type="email" id="le" autocomplete="username" required></label>
@@ -198,7 +238,7 @@ function telaLogin(aviso,modo){
     <p class="err" id="lm">${esc(aviso||"")}</p>
     <button class="pri">${modo==="entrar"?"Entrar":"Criar login"}</button>
   </form>
-  <button class="lk" id="lt">${modo==="entrar"?"Primeiro acesso do sistema":"Já tenho cadastro"}</button></div></div>`;
+  <button class="lk" id="lt">${modo==="entrar"?"Primeiro acesso do sistema":"Já tenho cadastro"}</button></div></main></div>`;
   $("#lt").onclick=()=>telaLogin("",modo==="entrar"?"criar":"entrar");
   $("#lf").onsubmit=async e=>{
     e.preventDefault();const b=$("#lf .pri");b.disabled=true;$("#lm").textContent="";
@@ -215,11 +255,11 @@ function telaLogin(aviso,modo){
   };
 }
 function telaSemPerfil(motivo){
-  $("#app").innerHTML=`<div class="login"><div class="box"><h1>Acesso não liberado</h1>
+  $("#app").innerHTML=`<div class="login"><aside class="side"><div class="lgbrand">Sistema de reservas</div></aside><main class="main"><div class="box"><h1>Acesso não liberado</h1>
   <p>${esc(motivo||"Seu login existe, mas ainda não tem um perfil neste sistema.")}</p>
   <form id="pf"><label>Se este é o primeiro acesso do sistema, informe seu nome para virar o Criador:<input id="pn" placeholder="Seu nome"></label>
   <p class="err" id="lm"></p><button class="pri">Ativar como Criador</button></form>
-  <button class="lk" id="so">Sair</button></div></div>`;
+  <button class="lk" id="so">Sair</button></div></main></div>`;
   $("#so").onclick=sair;
   $("#pf").onsubmit=async e=>{e.preventDefault();try{await rpc("ativar_primeiro_criador",{p_nome:$("#pn").value});await boot()}catch(er){$("#lm").textContent=er.message}};
 }
@@ -234,33 +274,34 @@ async function boot(){
   if(!ME)return telaSemPerfil();
   if(!ME.ativo)return telaSemPerfil("Seu acesso foi desativado. Fale com o responsável.");
   try{await carregaBase()}catch(e){return telaLogin(e.message)}
-  view="agenda";day=hoje();sub={};montaApp();iniciaAlertas();
+  view=ME.tipo==="agencia"?"agenda":"home";cfgMode=false;day=hoje();sub={};montaApp();iniciaAlertas();
 }
 async function carregaBase(){
   const [a,ag,cf]=await Promise.all([
     rest("atividades?select=*&ativa=eq.true&order=criado_em&limit=1"),
     rest("agencias?select=*&order=nome_fantasia"),
-    rest("configuracoes?select=*&chave=eq.alertas")]);
+    rest("configuracoes?select=*&chave=in.(alertas,personalizacao)")]);
   ATV=a[0];if(!ATV)throw new Error("Nenhuma atividade cadastrada no banco");
-  AGS=ag;if(cf[0])CFGAL=cf[0].valor;
+  AGS=ag;cf.forEach(c=>{if(c.chave==="alertas")CFGAL=c.valor;if(c.chave==="personalizacao")PERS=c.valor||{}});
   HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario");
 }
-const NAV={
-  agencia:[["agenda","Agenda"],["reservas","Minhas reservas"],["mp","Multiponto"]],
-  atendente:[["agenda","Mapa de vagas"],["reservas","Reservas"]],
-  gerente:[["agenda","Mapa de vagas"],["reservas","Reservas"],["fin","Financeiro"],["ags","Agências"],["usr","Usuários"],["cfg","Configurações"]]
-};NAV.criador=NAV.gerente;
+const GEST=[["home","Home"],["agenda","Mapa de vagas"],["Reservas",[["reservas","Listar reservas"],["registros","Lista de registros"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_tarifa","Tarifário"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ag_cad","Cadastrar agências"],["ags","Lista de agências"]]]];
+const MENU={criador:GEST,gerente:GEST,atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Reservas"]],agencia:[["agenda","Agenda"],["reservas","Minhas reservas"],["mp","Multiponto"]]};
+const navHtml=()=>MENU[ME.tipo].map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
+function header(){
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
+  aplicaPers();
+}
 function montaApp(){
-  $("#app").innerHTML=`<div class="top"><div class="in"><span class="brand">${esc(ATV.nome)}</span>
-  <div class="nav" id="nav">${NAV[ME.tipo].map(([k,n])=>`<button data-a="nav" data-v="${k}">${n}</button>`).join("")}</div>
-  <div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd">
-  <div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>
-  <button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div></div></div>
-  <div class="wrap"><div id="main"></div></div>`;
-  go(view);
+  $("#app").innerHTML=`<div class="top" id="hdr"></div><div class="wrap"><div id="main"></div></div>`;
+  header();go(view);
 }
 async function go(v){
-  view=v;document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  const c=v.startsWith("c_");view=v;
+  if(c!==cfgMode){cfgMode=c;header()}
+  document.querySelectorAll(".drop.open").forEach(x=>x.classList.remove("open"));
+  document.querySelectorAll("#nav button[data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  document.querySelectorAll("#nav .dd").forEach(d=>d.querySelector(".ddb").classList.toggle("on",!!d.querySelector(`[data-v="${v}"]`)));
   const m=$("#main");m.innerHTML=`<p class="vazio">Carregando…</p>`;
   try{await VIEWS[v]()}catch(e){m.innerHTML=`<p class="vazio err">${esc(e.message)}</p>`}
 }
@@ -345,75 +386,274 @@ async function vMp(){
 }
 const listaMp=(rc,conf)=>rc.length?`<div class="scroll"><table class="tb"><thead><tr><th>Enviado</th>${conf?"<th>Agência</th>":""}<th>Reserva</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead><tbody>${rc.map(x=>`<tr><td>${brd(x.criado_em)}</td>${conf?`<td>${esc(agNome(x.agencia_id))}</td>`:""}<td>${x.reservas?"Nº "+x.reservas.numero+" · "+esc(x.reservas.turista):"—"}</td><td class="num">${brl(x.valor)}</td><td><span class="st st-${x.status}">${x.status}</span>${x.motivo?`<br><small>${esc(x.motivo)}</small>`:""}</td><td class="ac">${x.comprovante_path?`<button data-a="verComp" data-p="${esc(x.comprovante_path)}">Ver</button>`:""}${conf&&x.status==="pendente"?`<button data-a="mpOk" data-id="${x.id}" data-v="${x.valor}">Aprovar</button><button data-a="mpNo" data-id="${x.id}">Recusar</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhum comprovante.</p>`;
 
-/* ================= Financeiro (gestão) ================= */
-async function vFin(){
-  sub.fin=sub.fin||"saldos";
-  $("#main").innerHTML=`<h2>Financeiro</h2><div class="tabs">${[["saldos","Saldos"],["mp","Conferir MP"],["faturas","Faturas"]].map(([k,n])=>`<button data-a="finTab" data-k="${k}" class="${sub.fin===k?"on":""}">${n}</button>`).join("")}</div><div class="msg" id="msg"></div><div id="fc"></div>`;
-  const c=$("#fc");
-  if(sub.fin==="saldos"){
-    const s=await rest("saldo_por_agencia?select=*&order=nome_fantasia");
-    c.innerHTML=s.length?`<div class="scroll"><table class="tb"><thead><tr><th>Agência</th><th class="num">Débitos</th><th class="num">Créditos</th><th class="num">Saldo</th><th class="num">Vencido</th><th></th></tr></thead><tbody>${s.map(x=>`<tr><td>${esc(x.nome_fantasia)} ${x.bloqueada?'<span class="st st-bloqueada">bloqueada</span>':""}</td><td class="num">${brl(x.debitos)}</td><td class="num">${brl(x.creditos)}</td><td class="num"><b>${brl(x.saldo)}</b></td><td class="num ${x.vencido>0?"err":""}">${brl(x.vencido)}</td><td class="ac"><button data-a="extrato" data-id="${x.agencia_id}">Extrato</button><button data-a="credito" data-id="${x.agencia_id}">+ Crédito</button><button data-a="fatura" data-id="${x.agencia_id}">Gerar fatura</button><button data-a="bloq" data-id="${x.agencia_id}" data-b="${x.bloqueada}">${x.bloqueada?"Desbloquear":"Bloquear"}</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Cadastre agências para ver os saldos.</p>`;
-  }else if(sub.fin==="mp"){
-    const rc=await rest("recebimentos_mp?select=*,reservas(numero,turista)&order=criado_em.desc&limit=100");
-    rc.sort((a,b)=>(b.status==="pendente")-(a.status==="pendente"));
-    c.innerHTML=listaMp(rc,true);
-  }else{
-    const f=await rest("faturas?select=*&order=numero.desc&limit=200");
-    c.innerHTML=f.length?`<div class="scroll"><table class="tb"><thead><tr><th>Nº</th><th>Emissão</th><th>Agência</th><th class="num">Total</th><th>Status</th><th></th></tr></thead><tbody>${f.map(x=>`<tr><td>${x.numero}</td><td>${brd(x.data_emissao)}</td><td>${esc(agNome(x.agencia_id))}</td><td class="num">${brl(x.valor_total)}</td><td><span class="st st-${x.status}">${x.status}</span></td><td class="ac"><button data-a="verFat" data-id="${x.id}" data-n="${x.numero}">Reservas</button>${x.status==="aberta"?`<button data-a="fatPaga" data-id="${x.id}">Marcar paga</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhuma fatura gerada.</p>`;
+/* ================= Helpers de telas ================= */
+const mesIni=()=>hoje().slice(0,7)+"-01";
+const mesFim=()=>{const [y,m]=hoje().split("-").map(Number);return ymd(new Date(y,m,0))};
+const kpi=(l,v)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
+const pcard=(t,b,c)=>`<section class="pc ${c||""}"><h3>${t}</h3>${b}</section>`;
+const tab=(cab,linhas)=>`<div class="scroll"><table class="tb"><thead><tr>${cab.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${linhas.map(l=>`<tr>${l.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+const vazio=t=>`<p class="vazio">${t}</p>`;
+const sel=(id,opts)=>`<select name="${id}" required>${opts}</select>`;
+const optAg=(v,todas)=>`<option value="">${todas||"Selecione uma agência"}</option>`+AGS.map(a=>`<option value="${a.id}"${a.id===v?" selected":""}>${esc(a.nome_fantasia)}</option>`).join("");
+const periodoBar=(f)=>`<form class="bar" id="pf"><label>De<input type="date" id="pi" value="${sub.pi}" required></label><label>Até<input type="date" id="pfim" value="${sub.pf}" required></label><button class="pri">Atualizar</button></form>`;
+const lerPeriodo=(f)=>{const e=$("#pf");if(e)e.onsubmit=ev=>{ev.preventDefault();sub.pi=$("#pi").value;sub.pf=$("#pfim").value;go(view)}};
+const fnUsr=b=>http("/functions/v1/gerenciar-usuarios",{method:"POST",body:b});
+
+/* ================= Home (painel) ================= */
+async function vHome(){
+  const d=hoje(),g=gestao();
+  const [vagas,res,sal,mes,aud]=await Promise.all([
+    rpc("vagas_do_dia",{p_atividade:ATV.id,p_data:d}),
+    rest(`reservas?select=*&atividade_id=eq.${ATV.id}&data=eq.${d}&status=neq.cancelada&order=horario,numero`),
+    g?rest("saldo_por_agencia?select=*&order=nome_fantasia"):[],
+    g?rest(`reservas?select=agencia_id,valor_total&data=gte.${mesIni()}&data=lte.${mesFim()}&status=neq.cancelada&limit=5000`):[],
+    g?rest("auditoria?select=em,tabela,acao,depois,antes&order=em.desc&limit=8"):[]]);
+  res.forEach(r=>RES[r.id]=r);
+  const ab=vagas.filter(v=>v.ativo).sort((a,b)=>String(a.horario).localeCompare(String(b.horario)));
+  const qt=r=>r.adultos+r.criancas+r.cortesias;
+  const pes=res.reduce((s,r)=>s+qt(r),0),livres=ab.reduce((s,v)=>s+v.livres,0);
+  const ag=new Date(),hm=String(ag.getHours()).padStart(2,"0")+":"+String(ag.getMinutes()).padStart(2,"0");
+  const prox=ab.find(v=>hh(v.horario)>=hm);
+  const cxProx=prox?`<div class="prox"><b>${hh(prox.horario)}</b><div class="pbar"><i style="width:${Math.min(100,Math.round(prox.ocupadas/prox.limite*100))}%"></i></div><span>${prox.ocupadas}/${prox.limite} · ${prox.livres?prox.livres+" vagas livres":"lotado"}</span></div>`:vazio("Sem mais saídas hoje.");
+  const pen=res.filter(r=>r.status==="pendente");
+  const penH=pen.length?pen.slice(0,6).map(r=>`<div class="li"><span><b>${hh(r.horario)}</b> · ${esc(agNome(r.agencia_id))} · ${esc(r.turista)} · ${qt(r)} pessoa(s)</span><button class="mini" data-a="hconf" data-id="${r.id}">Confirmar</button></div>`).join("")+(pen.length>6?`<p class="more">e mais ${pen.length-6}</p>`:""):vazio("Tudo confirmado.");
+  const chips=ab.map(v=>{const c=v.livres===0?"lot":v.livres<=2?"low":"ok";return `<button class="chip ${c}" data-a="nav" data-v="agenda"><b>${hh(v.horario)}</b><small>${v.livres?v.livres+" livres":"lotado"}</small></button>`}).join("");
+  let h=`<p class="rdata">Painel do dia ${brd(d)}</p>
+  <div class="atalhos"><button class="pri" data-a="nova">Nova reserva</button><button class="mini" data-a="nav" data-v="agenda">Mapa de vagas</button>${g?`<button class="mini" data-a="nav" data-v="f_cc">Conta corrente</button>`:""}</div>
+  <div class="kpis">${kpi("Reservas",res.length)}${kpi("Pessoas",pes)}${kpi("Vagas livres",livres)}</div>
+  <div class="pgrid">${pcard("Próximo horário",cxProx)}${pcard("Aguardando confirmação"+(pen.length?` <span class="badge bq">${pen.length}</span>`:""),penH)}${pcard("Vagas por horário",`<div class="chips">${chips||vazio("Sem horários abertos.")}</div>`,"wide")}</div>`;
+  if(g){
+    const aRec=sal.reduce((s,x)=>s+Number(x.saldo),0),venc=sal.reduce((s,x)=>s+Number(x.vencido),0);
+    const vDia=res.reduce((s,r)=>s+Number(r.valor_total),0),vMes=mes.reduce((s,r)=>s+Number(r.valor_total),0);
+    const inad=sal.filter(x=>x.vencido>0).sort((x,y)=>y.vencido-x.vencido).slice(0,5);
+    const inadH=inad.length?inad.map(x=>`<div class="li"><span><b>${esc(x.nome_fantasia)}</b> · ${brl(x.vencido)} vencido ${x.bloqueada?'<span class="badge bq">Bloqueada</span>':""}</span><span><button class="mini" data-a="abrirCC" data-id="${x.agencia_id}">Abrir</button> <button class="mini" data-a="bloq" data-id="${x.agencia_id}" data-b="${x.bloqueada}">${x.bloqueada?"Desbloquear":"Bloquear"}</button></span></div>`).join(""):vazio("Nenhuma agência inadimplente.");
+    h+=`<p class="psec">Financeiro</p><div class="kpis">${kpi("A receber",brl(aRec))}${kpi("Vencido",brl(venc))}${kpi("Vendas do dia",brl(vDia))}${kpi("Vendas do mês",brl(vMes))}${kpi("Agências bloqueadas",sal.filter(x=>x.bloqueada).length)}</div><div class="pgrid">${pcard("Agências inadimplentes",inadH,"wide")}</div>`;
+    const mm={};mes.forEach(r=>{const m=mm[r.agencia_id]=mm[r.agencia_id]||{n:0,v:0};m.n++;m.v+=Number(r.valor_total)});
+    const top=Object.entries(mm).sort((x,y)=>y[1].v-x[1].v).slice(0,5);
+    const rec=aud.map(x=>`<div class="li"><span>${esc(labelAud(x))}</span><small>${new Date(x.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</small></div>`).join("")||vazio("Sem atividade registrada.");
+    h+=`<p class="psec">Gestão</p><div class="pgrid">${pcard("Top agências do mês",top.length?tab(["Agência","Reservas","Vendas"],top.map(([a,v])=>[esc(agNome(a)),v.n,brl(v.v)])):vazio("Sem vendas neste mês."))}${pcard("Atividade recente",rec)}</div>`;
   }
+  $("#main").innerHTML=h;
+}
+const TBN={reservas:"Reserva",agencias:"Agência",tarifas:"Tarifa",usuarios:"Usuário",atividades:"Atividade",horarios_operacao:"Horário",recebimentos_mp:"Comprovante MP",faturas:"Fatura",configuracoes:"Configuração"};
+function labelAud(x){
+  const d=x.depois||{},a=x.antes||{};
+  if(x.tabela==="reservas"){const n=d.numero||a.numero;
+    if(x.acao==="INSERT")return `Reserva nº ${n} criada (${brd(d.data)} ${hh(d.horario||"00:00")}, ${agNome(d.agencia_id)}, ${d.turista})`;
+    if(d.status==="cancelada"&&a.status!=="cancelada")return `Reserva nº ${n} cancelada`;
+    if(a.status!==d.status)return `Reserva nº ${n}: status ${d.status}`;
+    if(a.data!==d.data||a.horario!==d.horario)return `Reserva nº ${n} movida para ${brd(d.data)} ${hh(d.horario||"00:00")}`;
+    return `Reserva nº ${n} alterada`;}
+  if(x.tabela==="agencias"){const n=d.nome_fantasia||a.nome_fantasia;
+    if(x.acao==="INSERT")return `Agência ${n} cadastrada`;
+    if(d.bloqueada!==a.bloqueada)return `Agência ${n} ${d.bloqueada?"bloqueada":"desbloqueada"}`;
+    return `Agência ${n} alterada`;}
+  if(x.tabela==="usuarios"){const n=d.nome||a.nome;return x.acao==="INSERT"?`Usuário ${n} criado`:`Usuário ${n} alterado`}
+  return `${TBN[x.tabela]||x.tabela} ${x.acao==="INSERT"?"criado(a)":x.acao==="DELETE"?"removido(a)":"alterado(a)"}`;
+}
+
+/* ================= Reservas: registros e estatísticas ================= */
+async function vRegistros(){
+  const [aud,us]=await Promise.all([rest("auditoria?select=em,tabela,acao,usuario_id,depois,antes&order=em.desc&limit=200"),rest("usuarios?select=id,nome")]);
+  const nm=Object.fromEntries(us.map(u=>[u.id,u.nome]));
+  $("#main").innerHTML=`<h2>Lista de registros</h2><p class="sub" style="text-align:left">Últimas 200 alterações feitas no sistema.</p>`+(aud.length?tab(["Quando","Registro","Quem"],aud.map(x=>[new Date(x.em).toLocaleString("pt-BR"),esc(labelAud(x)),esc(nm[x.usuario_id]||"—")])):vazio("Nenhum registro ainda."));
+}
+async function vEstat(){
+  sub.pi=sub.pi||mesIni();sub.pf=sub.pf||mesFim();
+  const rs=await rest(`reservas?select=agencia_id,horario,adultos,criancas,cortesias,valor_total&atividade_id=eq.${ATV.id}&data=gte.${sub.pi}&data=lte.${sub.pf}&status=neq.cancelada&limit=5000`);
+  const soma=f=>rs.reduce((s,r)=>s+f(r),0),qt=r=>r.adultos+r.criancas+r.cortesias,pess=soma(qt);
+  const grupo=f=>{const m={};rs.forEach(r=>{const k=f(r);(m[k]=m[k]||{res:0,pess:0,v:0});m[k].res++;m[k].pess+=qt(r);m[k].v+=Number(r.valor_total)});return Object.entries(m).sort()};
+  $("#main").innerHTML=`<h2>Estatísticas</h2>${periodoBar()}<div class="kpis">${kpi("Reservas",rs.length)}${kpi("Pessoas",pess)}${kpi("Adultos",soma(r=>r.adultos))}${kpi("Crianças",soma(r=>r.criancas))}${kpi("Cortesias",soma(r=>r.cortesias))}${kpi("Média por reserva",rs.length?(pess/rs.length).toFixed(1).replace(".",","):"0")}</div>`+(rs.length?`<h3>Por agência</h3>${tab(["Agência","Reservas","Pessoas","Vendas"],grupo(r=>agNome(r.agencia_id)).map(([k,g])=>[esc(k),g.res,g.pess,brl(g.v)]))}<h3>Por horário</h3>${tab(["Horário","Reservas","Pessoas"],grupo(r=>hh(r.horario)).map(([k,g])=>[k,g.res,g.pess]))}`:vazio("Sem dados no período."));
+  lerPeriodo();
+}
+
+/* ================= Financeiro ================= */
+async function vFaturas(){
+  const f=await rest("faturas?select=*&order=numero.desc&limit=200");
+  $("#main").innerHTML=`<h2>Listar faturas</h2><div class="msg" id="msg"></div>`+(f.length?tab(["Nº","Emissão","Agência","Total","Status",""],f.map(x=>[x.numero,brd(x.data_emissao),esc(agNome(x.agencia_id)),brl(x.valor_total),`<span class="st st-${x.status}">${x.status}</span>`,`<span class="ac"><button data-a="verFat" data-id="${x.id}" data-n="${x.numero}">Reservas</button>${x.status==="aberta"?`<button data-a="fatPaga" data-id="${x.id}">Marcar paga</button>`:""}</span>`])):vazio("Nenhuma fatura gerada."));
+}
+async function vGerar(){
+  const s=await rest("saldo_por_agencia?select=*&order=nome_fantasia");
+  $("#main").innerHTML=`<h2>Gerar faturas</h2><p class="sub" style="text-align:left">A fatura reúne tudo o que a agência ainda não faturou (reservas e estornos).</p><div class="msg" id="msg"></div>`+(s.length?tab(["Agência","Débitos","Créditos","Saldo",""],s.map(x=>[esc(x.nome_fantasia),brl(x.debitos),brl(x.creditos),brl(x.saldo),`<span class="ac"><button data-a="fatura" data-id="${x.agencia_id}">Gerar fatura</button></span>`])):vazio("Cadastre agências primeiro."));
+}
+async function vValor(){
+  const fp=await rest("formas_pagamento?select=*&ativa=eq.true&order=nome");
+  $("#main").innerHTML=`<h2>Inserir valor</h2><div class="card"><p class="sub" style="text-align:left">Lança um pagamento (crédito) na conta corrente da agência.</p><form id="vf" class="fm"><label>Agência${sel("ag",optAg(sub.ccag))}</label><label>Valor (R$)<input name="v" type="number" step="0.01" min="0.01" required></label><label>Forma de pagamento${sel("fp",fp.map(f=>`<option value="${f.id}">${esc(f.nome)}</option>`).join(""))}</label><label>Descrição<input name="d" value="Pagamento recebido"></label><p class="err" id="merr"></p><button class="pri">Lançar crédito</button></form></div><div class="msg" id="msg"></div>`;
+  $("#vf").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await ins("lancamentos",{agencia_id:f.get("ag"),tipo:"credito",valor:+f.get("v"),forma_pagamento_id:f.get("fp"),descricao:f.get("d")||"Crédito"});$("#merr").textContent="";e.target.reset();msg("Crédito lançado.")}catch(er){$("#merr").textContent=er.message}};
+}
+async function vTarifa(){
+  const tar=await rest("tarifas?select=*&atividade_id=eq."+ATV.id+"&ativa=eq.true&order=data_inicio");
+  const pad=tar.find(t=>t.tipo==="padrao"),per=tar.filter(t=>t.tipo==="periodo");
+  RES.tar=Object.fromEntries(tar.map(t=>[t.id,t]));
+  $("#main").innerHTML=`<h2>Tarifário</h2><div class="msg" id="msg"></div><div class="card"><h3>Valor padrão</h3><p class="sub" style="text-align:left">Mudanças valem só para novas reservas; as já feitas mantêm o valor.</p>
+  <form id="ft" class="fr"><label>Adulto (R$)<input name="a" type="number" step="0.01" min="0" required value="${pad?pad.valor_adulto:""}"></label><label>Criança (R$)<input name="c" type="number" step="0.01" min="0" required value="${pad?pad.valor_crianca:""}"></label><label>Cortesia (R$)<input name="o" type="number" step="0.01" min="0" value="${pad?pad.valor_cortesia:0}"></label><label>&nbsp;<button class="pri">${pad?"Salvar valor padrão":"Cadastrar valor padrão"}</button></label></form></div>
+  <div class="card"><h3>Períodos com valor diferente</h3><p class="sub" style="text-align:left">Alta e baixa temporada: no período escolhido vale o valor abaixo.</p><button class="sec" data-a="perNovo">+ Novo período</button>
+  ${per.length?`<div style="margin-top:10px">${tab(["Nome","De","Até","Adulto","Criança",""],per.map(p=>[esc(p.nome||""),brd(p.data_inicio),brd(p.data_fim),brl(p.valor_adulto),brl(p.valor_crianca),`<span class="ac"><button data-a="perEd" data-id="${p.id}">Editar</button><button data-a="perDel" data-id="${p.id}">Remover</button></span>`])) }</div>`:vazio("Nenhum período cadastrado.")}</div>`;
+  $("#ft").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),o={valor_adulto:+f.get("a"),valor_crianca:+f.get("c"),valor_cortesia:+f.get("o")||0};try{if(pad)await upd("tarifas","id=eq."+pad.id,o);else await ins("tarifas",{...o,atividade_id:ATV.id,tipo:"padrao",nome:"Padrão"});go("f_tarifa");setTimeout(()=>msg("Valor padrão salvo."),300)}catch(er){msg(er.message,1)}};
+}
+async function vSaldos(){
+  const s=await rest("saldo_por_agencia?select=*&order=nome_fantasia");
+  $("#main").innerHTML=`<h2>Relatório de saldos</h2><div class="msg" id="msg"></div>`+(s.length?tab(["Agência","Débitos","Créditos","Saldo","Vencido",""],s.map(x=>[esc(x.nome_fantasia)+(x.bloqueada?' <span class="st st-bloqueada">bloqueada</span>':""),brl(x.debitos),brl(x.creditos),`<b>${brl(x.saldo)}</b>`,`<span class="${x.vencido>0?"err":""}">${brl(x.vencido)}</span>`,`<span class="ac"><button data-a="abrirCC" data-id="${x.agencia_id}">Conta corrente</button></span>`])):vazio("Cadastre agências para ver os saldos."))+`<p class="tot"><button class="pri" data-a="imprimir">Imprimir / salvar em PDF</button></p>`;
+}
+async function vVendas(){
+  sub.pi=sub.pi||mesIni();sub.pf=sub.pf||mesFim();
+  const rs=await rest(`reservas?select=agencia_id,adultos,criancas,cortesias,valor_total&atividade_id=eq.${ATV.id}&data=gte.${sub.pi}&data=lte.${sub.pf}&status=neq.cancelada&limit=5000`);
+  const m={};rs.forEach(r=>{const g=m[r.agencia_id]=m[r.agencia_id]||{n:0,p:0,v:0};g.n++;g.p+=r.adultos+r.criancas+r.cortesias;g.v+=Number(r.valor_total)});
+  const l=Object.entries(m).sort((a,b)=>b[1].v-a[1].v),tot=l.reduce((s,[,g])=>s+g.v,0);
+  $("#main").innerHTML=`<h2>Relatório de vendas</h2>${periodoBar()}<div class="kpis">${kpi("Reservas",rs.length)}${kpi("Vendas",brl(tot))}</div>`+(l.length?tab(["Agência","Reservas","Pessoas","Vendas"],l.map(([a,g])=>[esc(agNome(a)),g.n,g.p,brl(g.v)])):vazio("Sem vendas no período."))+`<p class="tot"><button class="pri" data-a="imprimir">Imprimir / salvar em PDF</button></p>`;
+  lerPeriodo();
+}
+async function vCC(){
+  const s=await rest("saldo_por_agencia?select=*&order=nome_fantasia");
+  const ag=sub.ccag||"";const x=s.find(z=>z.agencia_id===ag);
+  let corpo=vazio("Escolha uma agência para ver a conta corrente.");
+  if(x){
+    const l=await rest("lancamentos?select=*&agencia_id=eq."+ag+"&order=criado_em.desc&limit=300");
+    const T={debito:"Débito",credito:"Crédito",estorno:"Estorno"};
+    corpo=`<div class="kpis">${kpi("Débitos",brl(x.debitos))}${kpi("Créditos",brl(x.creditos))}${kpi("Saldo",brl(x.saldo))}${kpi("Vencido",brl(x.vencido))}</div>
+    <div class="atalhos"><button class="pri" data-a="credito" data-id="${ag}">+ Lançar crédito</button><button class="mini" data-a="bloq" data-id="${ag}" data-b="${x.bloqueada}">${x.bloqueada?"Desbloquear agência":"Bloquear agência"}</button><button class="mini" data-a="fatura" data-id="${ag}">Gerar fatura</button>${x.bloqueada?'<span class="st st-bloqueada">bloqueada</span>':""}</div>`+
+    (l.length?tab(["Data","Descrição","Vencimento","Débito","Crédito"],l.map(z=>[brd(z.criado_em),`${T[z.tipo]} — ${esc(z.descricao||"")}`,brd(z.vencimento),z.tipo==="debito"?brl(z.valor):"",z.tipo==="debito"?"":brl(z.valor)])):vazio("Sem lançamentos."));
+  }
+  $("#main").innerHTML=`<h2>Conta corrente</h2><div class="bar"><label>Agência<select id="ccsel">${optAg(ag,"Selecione")}</select></label></div><div class="msg" id="msg"></div>${corpo}`;
+  $("#ccsel").onchange=e=>{sub.ccag=e.target.value;go("f_cc")};
+}
+async function vMpConf(){
+  const rc=await rest("recebimentos_mp?select=*,reservas(numero,turista)&order=criado_em.desc&limit=100");
+  rc.sort((a,b)=>(b.status==="pendente")-(a.status==="pendente"));
+  $("#main").innerHTML=`<h2>Conferir multiponto</h2><p class="sub" style="text-align:left">Comprovantes enviados pelas agências. Ao aprovar, o crédito entra na conta corrente.</p>${listaMp(rc,true)}`;
 }
 
 /* ================= Agências ================= */
+const campoAg=a=>{a=a||{};const L=(n,l,v,t)=>`<label>${l}<input name="${n}" type="${t||"text"}" value="${esc(v||"")}"></label>`;
+  return `<label>Nome fantasia<input name="nome_fantasia" id="agn" required autocomplete="off" value="${esc(a.nome_fantasia||"")}"></label><div id="agd"${a.id?"":" hidden"}>${L("razao_social","Razão social",a.razao_social)}${L("cnpj","CNPJ",a.cnpj)}${L("telefone","Telefone",a.telefone)}${L("responsavel","Responsável",a.responsavel)}${L("email","E-mail",a.email,"email")}${L("endereco","Endereço",a.endereco)}${L("cidade_uf","Cidade/UF",a.cidade_uf)}${L("cep","CEP",a.cep)}<label>Comissão (%)<input name="comissao_percentual" type="number" step="0.01" min="0" max="100" value="${a.comissao_percentual||0}"></label></div>`};
+const lerAg=f=>{const o={};for(const k of["nome_fantasia","razao_social","cnpj","telefone","responsavel","email","endereco","cidade_uf","cep"])o[k]=(f.get(k)||"").trim()||null;o.nome_fantasia=o.nome_fantasia||"";o.comissao_percentual=+f.get("comissao_percentual")||0;return o};
+const revelaAg=()=>{const n=$("#agn"),d=$("#agd");if(n&&d)n.oninput=()=>{d.hidden=!n.value.trim()}};
+async function vAgCad(){
+  $("#main").innerHTML=`<h2>Cadastrar agências</h2><div class="card"><form id="af" class="fm">${campoAg()}<p class="err" id="merr"></p><button class="pri">Cadastrar agência</button></form></div><div class="msg" id="msg"></div>`;
+  revelaAg();
+  $("#af").onsubmit=async e=>{e.preventDefault();try{await ins("agencias",lerAg(new FormData(e.target)));AGS=await rest("agencias?select=*&order=nome_fantasia");go("ag_cad");setTimeout(()=>msg("Agência cadastrada."),300)}catch(er){$("#merr").textContent=er.message}};
+}
 async function vAgs(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
-  $("#main").innerHTML=`<h2>Agências</h2><div class="bar"><button class="pri" data-a="agNova">+ Nova agência</button></div><div class="msg" id="msg"></div>
-  ${AGS.length?`<div class="scroll"><table class="tb"><thead><tr><th>Nome fantasia</th><th>Status</th><th>Comissão</th><th>Contato</th><th></th></tr></thead><tbody>${AGS.map(a=>`<tr><td>${esc(a.nome_fantasia)}</td><td><span class="st st-${a.status}">${a.status}</span></td><td>${Number(a.comissao_percentual)}%</td><td>${esc([a.responsavel,a.telefone,a.email].filter(Boolean).join(" · "))}</td><td class="ac"><button data-a="agEd" data-id="${a.id}">Editar</button><button data-a="bloq" data-id="${a.id}" data-b="${a.bloqueada}">${a.bloqueada?"Desbloquear":"Bloquear"}</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhuma agência cadastrada.</p>`}`;
+  $("#main").innerHTML=`<h2>Lista de agências</h2><div class="msg" id="msg"></div>`+(AGS.length?tab(["Agência","Status","",""],AGS.map(a=>[esc(a.nome_fantasia),`<span class="st st-${a.status}">${a.status}</span>`,`<span class="ac"><button data-a="bloq" data-id="${a.id}" data-b="${a.bloqueada}">${a.bloqueada?"Desbloquear":"Bloquear"}</button><button data-a="agrel" data-id="${a.id}">Relatório</button><button data-a="agEd" data-id="${a.id}">Editar</button></span>`,""])):vazio("Nenhuma agência cadastrada."));
 }
-const campoAg=a=>{a=a||{};const L=(n,l,v,t)=>`<label>${l}<input name="${n}" type="${t||"text"}" value="${esc(v||"")}"></label>`;
-  return `<label>Nome fantasia<input name="nome_fantasia" required value="${esc(a.nome_fantasia||"")}"></label>${L("razao_social","Razão social",a.razao_social)}${L("cnpj","CNPJ",a.cnpj)}${L("telefone","Telefone",a.telefone)}${L("responsavel","Responsável",a.responsavel)}${L("email","E-mail",a.email,"email")}${L("endereco","Endereço",a.endereco)}${L("cidade_uf","Cidade/UF",a.cidade_uf)}${L("cep","CEP",a.cep)}<label>Comissão (%)<input name="comissao_percentual" type="number" step="0.01" min="0" max="100" value="${a.comissao_percentual||0}"></label>`};
-const lerAg=f=>{const o={};for(const k of["nome_fantasia","razao_social","cnpj","telefone","responsavel","email","endereco","cidade_uf","cep"])o[k]=(f.get(k)||"").trim()||null;o.nome_fantasia=o.nome_fantasia||"";o.comissao_percentual=+f.get("comissao_percentual")||0;return o};
+async function vAgRel(){
+  const id=sub.agrel;const [s,rs]=await Promise.all([rest("saldo_por_agencia?select=*&agencia_id=eq."+id),rest(`reservas?select=*&agencia_id=eq.${id}&order=data.desc,horario&limit=500`)]);
+  const x=s[0]||{},ativas=rs.filter(r=>r.status!=="cancelada"),pess=ativas.reduce((a,r)=>a+r.adultos+r.criancas+r.cortesias,0),vend=ativas.reduce((a,r)=>a+Number(r.valor_total),0);
+  $("#main").innerHTML=`<button class="sec noprint" data-a="ir" data-v="ags">← Lista de agências</button><h2>Relatório — ${esc(agNome(id))}</h2><p class="sub" style="text-align:left">${x.bloqueada?"Bloqueada":"Ativa"}</p><div class="kpis">${kpi("Reservas",ativas.length)}${kpi("Pessoas",pess)}${kpi("Vendas",brl(vend))}${kpi("Faturado",brl(x.debitos))}${kpi("Recebido",brl(x.creditos))}${kpi("Saldo",brl(x.saldo))}</div>`+(rs.length?tab(["Data","Horário","Nº","Turista","Pessoas","Valor","Status"],rs.map(r=>[brd(r.data),hh(r.horario),r.numero,esc(r.turista),`${r.adultos}+${r.criancas}+${r.cortesias}`,brl(r.valor_total),`<span class="st st-${r.status}">${r.status}</span>`])):vazio("Nenhuma reserva para esta agência."))+`<p class="tot noprint"><button class="pri" data-a="imprimir">Imprimir / salvar em PDF</button></p>`;
+}
 
-/* ================= Usuários ================= */
-async function vUsr(){
+/* ================= Configurações (tela própria) ================= */
+const CT={c_menu:"Configuração",c_tema:"Tema",c_limite:"Limite de pessoas por horário",c_atv:"Nome da atividade",c_alertas:"Alertas de reserva",c_pers:"Personalização",c_horarios:"Horários de operação",c_usuarios:"Usuários",c_ucad:"Cadastrar usuário",c_ulist:"Listar usuários",c_ulista:"Lista de usuários",c_uedit:"Editar usuário"};
+const BACKC={c_tema:"c_menu",c_limite:"c_menu",c_atv:"c_menu",c_alertas:"c_menu",c_pers:"c_menu",c_horarios:"c_menu",c_usuarios:"c_menu",c_ucad:"c_usuarios",c_ulist:"c_usuarios",c_ulista:"c_ulist",c_uedit:"c_ulista"};
+const cfgTop=v=>(BACKC[v]?`<button class="sec" data-a="ir" data-v="${BACKC[v]}">← ${CT[BACKC[v]]}</button>`:"")+`<h2>${CT[v]}</h2><div class="msg" id="msg"></div>`;
+const cfgItem=(k,t,s)=>`<button class="cfgit" data-a="ir" data-v="${k}"><span><b>${t}</b><small>${s}</small></span><span aria-hidden="true">›</span></button>`;
+const TEMAS={"":"Automático",light:"Claro",dark:"Escuro"};
+const temaAtual=()=>ls.get("tema")||"";
+function aplicaTema(){const t=temaAtual();if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme}
+function vcMenu(){
+  $("#main").innerHTML=`<h2>Configuração</h2><div class="cfglist">${[["c_tema","Tema",TEMAS[temaAtual()]],["c_limite","Limite de pessoas por horário",ATV.limite_pessoas+" pessoas"],["c_atv","Nome da atividade",esc(ATV.nome)],["c_alertas","Alertas de reserva",CFGAL.ativo?`Ativos · som a cada ${CFGAL.intervalo_segundos}s`:"Desativados"],["c_pers","Personalização","Logo, plano de fundo e cores"],["c_horarios","Horários de operação",HOR.filter(h=>h.ativo).length+" horários abertos"],["c_usuarios","Usuários","Cadastrar e listar"]].map(x=>cfgItem(...x)).join("")}</div>`;
+}
+function vcTema(){
+  $("#main").innerHTML=cfgTop("c_tema")+`<div class="card"><form id="cf" class="fm"><label>Tema (vale só neste aparelho)<select name="t">${Object.entries(TEMAS).map(([k,t])=>`<option value="${k}"${temaAtual()===k?" selected":""}>${t}</option>`).join("")}</select></label><button class="pri">Salvar</button></form></div>`;
+  $("#cf").onsubmit=e=>{e.preventDefault();ls.set("tema",new FormData(e.target).get("t"));aplicaTema();msg("Tema salvo.")};
+}
+function vcLimite(){
+  $("#main").innerHTML=cfgTop("c_limite")+`<div class="card"><form id="cf" class="fm"><label>Pessoas por horário<input name="l" type="number" min="1" value="${ATV.limite_pessoas}" required></label><button class="pri">Salvar</button></form><p class="sub" style="text-align:left">Vale para novas reservas. Reservas existentes não são alteradas.</p></div>`;
+  $("#cf").onsubmit=async e=>{e.preventDefault();try{const r=await upd("atividades","id=eq."+ATV.id,{limite_pessoas:+new FormData(e.target).get("l")});ATV=r[0];msg("Limite salvo.")}catch(er){msg(er.message,1)}};
+}
+function vcAtv(){
+  $("#main").innerHTML=cfgTop("c_atv")+`<div class="card"><form id="cf" class="fm"><label>Nome da atividade<input name="n" value="${esc(ATV.nome)}" required></label><button class="pri">Salvar</button></form></div>`;
+  $("#cf").onsubmit=async e=>{e.preventDefault();try{const r=await upd("atividades","id=eq."+ATV.id,{nome:new FormData(e.target).get("n").trim()});ATV=r[0];const b=$(".brand");if(b)b.textContent=ATV.nome;msg("Nome salvo.")}catch(er){msg(er.message,1)}};
+}
+function vcAlertas(){
+  const perm="Notification" in window?Notification.permission:"indisponível";
+  $("#main").innerHTML=cfgTop("c_alertas")+`<div class="card"><form id="cf" class="fm"><label class="chk"><input type="checkbox" name="ativo" ${CFGAL.ativo?"checked":""}> Ativar alertas de nova reserva</label><label class="chk"><input type="checkbox" name="som" ${CFGAL.som?"checked":""}> Tocar som até confirmar</label><label>Repetir o som a cada (segundos)<input name="seg" type="number" min="5" value="${CFGAL.intervalo_segundos||30}"></label><h3>Quem recebe</h3><div class="fr">${["criador","gerente","atendente"].map(t=>`<label class="chk"><input type="checkbox" name="t_${t}" ${(CFGAL.tipos||[]).includes(t)?"checked":""}> ${NIVEL[t]}</label>`).join("")}</div><p class="sub" style="text-align:left">Notificação do aparelho: <b>${perm==="granted"?"permitida":perm==="denied"?"bloqueada":perm==="default"?"ainda não pedida":perm}</b> — cada pessoa ativa no próprio aparelho em ⋮ → Ativar notificações.</p><button class="pri">Salvar</button> <button type="button" class="sec" data-a="testeAlerta">Testar som</button></form></div><p class="sub">No celular, use "Adicionar à tela inicial" no menu do navegador para abrir como app.</p>`;
+  $("#cf").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const v={ativo:!!f.get("ativo"),som:!!f.get("som"),intervalo_segundos:Math.max(5,+f.get("seg")||30),tipos:["criador","gerente","atendente"].filter(t=>f.get("t_"+t))};try{await upd("configuracoes","chave=eq.alertas",{valor:v,atualizado_em:new Date().toISOString()});CFGAL=v;msg("Alertas salvos.")}catch(er){msg(er.message,1)}};
+}
+async function vcHorarios(){
+  HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario");
+  $("#main").innerHTML=cfgTop("c_horarios")+`<div class="card"><p class="sub" style="text-align:left">Marque os horários que podem receber reservas.</p><div class="hogrid">${HOR.map(h=>`<label class="chk"><input type="checkbox" data-h="${h.id}" ${h.ativo?"checked":""}> ${hh(h.horario)}</label>`).join("")}</div><button class="pri" data-a="salvaHor">Salvar horários</button></div>`;
+}
+function vcPers(){
+  const p=PERS||{};
+  $("#main").innerHTML=cfgTop("c_pers")+`<div class="card"><h3>Logo</h3><p class="sub" style="text-align:left">Aparece no canto superior direito.</p><input type="file" id="plogo" accept="image/*"> <button class="sec" data-a="persDel" data-k="logo">Remover logo</button>
+  <h3>Plano de fundo</h3><input type="file" id="pbg" accept="image/*"> <button class="sec" data-a="persDel" data-k="bg">Remover plano de fundo</button>
+  <h3>Cores do sistema</h3><div class="fr"><label>Cor de destaque<input type="color" id="pcor" value="${p.cor||"#16a34a"}"></label><label>Cor de fundo<input type="color" id="pfundo" value="${p.fundo||"#f1f7f3"}"></label></div><p><button class="pri" data-a="persCores">Aplicar cores</button> <button class="sec" data-a="persDel" data-k="cores">Restaurar cores padrão</button></p></div>`;
+  $("#plogo").onchange=e=>persImg(e.target.files[0],"logo",240,"image/png");
+  $("#pbg").onchange=e=>persImg(e.target.files[0],"bg",1600,"image/jpeg");
+}
+async function salvaPers(novo){
+  PERS={...PERS,...novo};Object.keys(PERS).forEach(k=>{if(PERS[k]==null)delete PERS[k]});
+  await http("/rest/v1/configuracoes",{method:"POST",body:{chave:"personalizacao",valor:PERS,atualizado_em:new Date().toISOString()},prefer:"resolution=merge-duplicates,return=representation"});
+  aplicaPers();
+}
+async function persImg(file,k,max,tipo){
+  if(!file)return;
+  try{
+    const bm=await createImageBitmap(file),esc_=Math.min(1,max/Math.max(bm.width,bm.height)),c=document.createElement("canvas");
+    c.width=Math.round(bm.width*esc_);c.height=Math.round(bm.height*esc_);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
+    await salvaPers({[k]:c.toDataURL(tipo,.78)});msg(k==="logo"?"Logo salvo.":"Plano de fundo salvo.");
+  }catch(e){msg(e.message||"Não foi possível usar essa imagem.",1)}
+}
+function aplicaPers(){
+  const p=PERS||{},r=document.documentElement.style;
+  if(p.cor){r.setProperty("--ac",p.cor);r.setProperty("--soft","color-mix(in srgb,"+p.cor+" 16%,transparent)")}else{r.removeProperty("--ac");r.removeProperty("--soft")}
+  if(p.fundo)r.setProperty("--bg",p.fundo);else r.removeProperty("--bg");
+  document.body.style.backgroundImage=p.bg?`url(${p.bg})`:"";
+  const lg=$("#logo");if(lg){lg.hidden=!p.logo;if(p.logo)lg.src=p.logo}
+}
+function vcUsuarios(){
+  $("#main").innerHTML=cfgTop("c_usuarios")+`<div class="cfglist">${cfgItem("c_ucad","Cadastrar usuário","Criar login e senha")}${cfgItem("c_ulist","Listar usuários","Filtrar por agência")}</div>`;
+}
+async function vcUcad(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
-  const us=await rest("usuarios?select=*&order=nome");
+  const tipos=ME.tipo==="criador"?["agencia","atendente","gerente","criador"]:["agencia","atendente"];
+  $("#main").innerHTML=cfgTop("c_ucad")+`<div class="card"><form id="cf" class="fm"><label>Nome<input name="n" required autocomplete="off"></label><label>E-mail (será o login)<input name="e" type="email" required autocomplete="off"></label><label>Nível<select name="t" id="ut">${tipos.map(t=>`<option value="${t}">${NIVEL[t]}</option>`).join("")}</select></label><label id="ual">Agência<select name="a" id="ua">${optAg("")}</select></label><label>Senha (mín. 8)<input name="s" type="password" minlength="8" autocomplete="new-password" required></label><label>Confirmar senha<input name="s2" type="password" autocomplete="new-password" required></label><p class="err" id="merr"></p><button class="pri">Cadastrar</button></form></div>`;
+  const sy=()=>{$("#ual").style.display=$("#ut").value==="agencia"?"":"none"};$("#ut").onchange=sy;sy();
+  $("#cf").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),t=f.get("t");
+    if(f.get("s")!==f.get("s2"))return $("#merr").textContent="As senhas não conferem.";
+    if(t==="agencia"&&!f.get("a"))return $("#merr").textContent="Escolha a agência do usuário.";
+    try{await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:t,agencia_id:t==="agencia"?f.get("a"):null});e.target.reset();sy();$("#merr").textContent="";msg("Usuário cadastrado.")}catch(er){$("#merr").textContent=er.message}};
+}
+async function vcUlist(){
+  AGS=await rest("agencias?select=*&order=nome_fantasia");
+  $("#main").innerHTML=cfgTop("c_ulist")+`<div class="card"><form id="cf" class="fm"><label>Agência<select name="a">${optAg(sub.ufa,"Todas as agências")}</select></label><button class="pri">Listar usuários</button></form></div>`;
+  $("#cf").onsubmit=e=>{e.preventDefault();sub.ufa=new FormData(e.target).get("a");go("c_ulista")};
+}
+async function vcUlista(){
+  AGS=await rest("agencias?select=*&order=nome_fantasia");
   const fa=sub.ufa||"";
-  const ls_=us.filter(u=>!fa||u.agencia_id===fa);
-  $("#main").innerHTML=`<h2>Usuários</h2><div class="bar"><button class="pri" data-a="usNovo">+ Novo usuário</button><label>Filtrar por agência<select id="ufa"><option value="">Todas</option>${AGS.map(a=>`<option value="${a.id}"${a.id===fa?" selected":""}>${esc(a.nome_fantasia)}</option>`).join("")}</select></label></div><div class="msg" id="msg"></div>
-  ${ls_.length?`<div class="scroll"><table class="tb"><thead><tr><th>Nome</th><th>E-mail (login)</th><th>Nível</th><th>Agência</th><th>Status</th><th></th></tr></thead><tbody>${ls_.map(u=>`<tr><td>${esc(u.nome)}</td><td>${esc(u.email)}</td><td>${NIVEL[u.tipo]}</td><td>${u.agencia_id?esc(agNome(u.agencia_id)):"—"}</td><td><span class="st st-${u.ativo?"ativa":"inativa"}">${u.ativo?"ativo":"desativado"}</span></td><td class="ac">${u.tipo==="agencia"?`<button data-a="usAg" data-id="${u.id}">Alterar agência</button>`:""}<button data-a="usSenha" data-id="${u.id}">Nova senha</button>${u.id!==ME.id?`<button data-a="usAtivo" data-id="${u.id}" data-v="${u.ativo}">${u.ativo?"Desativar":"Ativar"}</button>`:""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhum usuário.</p>`}`;
-  $("#ufa").onchange=e=>{sub.ufa=e.target.value;go("usr")};
-  RES.us=Object.fromEntries(us.map(u=>[u.id,u]));
+  const us=await rest("usuarios?select=*&order=nome"+(fa?"&agencia_id=eq."+fa:""));
+  $("#main").innerHTML=cfgTop("c_ulista")+`<p class="sub">${fa?"Agência: "+esc(agNome(fa)):"Todas as agências"}</p>`+(us.length?tab(["Nome","E-mail (login)","Nível","Agência","Status",""],us.map(u=>[`<button class="lnk" data-a="uedit" data-id="${u.id}">${esc(u.nome)}</button>`,esc(u.email),NIVEL[u.tipo],u.agencia_id?esc(agNome(u.agencia_id)):"—",`<span class="st st-${u.ativo?"ativa":"inativa"}">${u.ativo?"ativo":"desativado"}</span>`,`<span class="ac"><button data-a="uedit" data-id="${u.id}">Editar</button></span>`])):vazio("Nenhum usuário encontrado para este filtro."));
 }
-const fnUsr=b=>http("/functions/v1/gerenciar-usuarios",{method:"POST",body:b});
-
-/* ================= Configurações ================= */
-async function vCfg(){
-  const [tar,hs,cf]=await Promise.all([
-    rest("tarifas?select=*&atividade_id=eq."+ATV.id+"&ativa=eq.true&order=data_inicio"),
-    rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario"),
-    rest("configuracoes?select=*&chave=eq.alertas")]);
-  HOR=hs;if(cf[0])CFGAL=cf[0].valor;
-  const pad=tar.find(t=>t.tipo==="padrao"),per=tar.filter(t=>t.tipo==="periodo");
-  RES.tar=Object.fromEntries(tar.map(t=>[t.id,t]));
-  $("#main").innerHTML=`<h2>Configurações</h2><div class="msg" id="msg"></div>
-  <div class="card"><h3>Atividade</h3><form id="fa" class="fr"><label>Nome<input name="n" value="${esc(ATV.nome)}" required></label><label>Limite de pessoas por horário<input name="l" type="number" min="1" value="${ATV.limite_pessoas}" required></label><label>&nbsp;<button class="pri">Salvar</button></label></form></div>
-  <div class="card"><h3>Horários de operação</h3><p class="sub" style="text-align:left">Marque os horários que podem receber reservas.</p><div class="hogrid">${HOR.map(h=>`<label class="chk"><input type="checkbox" data-h="${h.id}" ${h.ativo?"checked":""}> ${hh(h.horario)}</label>`).join("")}</div><button class="pri" data-a="salvaHor">Salvar horários</button></div>
-  <div class="card"><h3>Tarifário</h3><p class="sub" style="text-align:left">Valor padrão e períodos com valor diferente (alta/baixa temporada). Mudanças valem só para novas reservas; as já feitas mantêm o valor.</p>
-  <form id="ft" class="fr"><label>Adulto (R$)<input name="a" type="number" step="0.01" min="0" required value="${pad?pad.valor_adulto:""}"></label><label>Criança (R$)<input name="c" type="number" step="0.01" min="0" required value="${pad?pad.valor_crianca:""}"></label><label>Cortesia (R$)<input name="o" type="number" step="0.01" min="0" value="${pad?pad.valor_cortesia:0}"></label><label>&nbsp;<button class="pri">${pad?"Salvar valor padrão":"Cadastrar valor padrão"}</button></label></form>
-  <h3>Períodos com valor diferente</h3><button class="sec" data-a="perNovo">+ Novo período</button>
-  ${per.length?`<div class="scroll" style="margin-top:8px"><table class="tb"><thead><tr><th>Nome</th><th>De</th><th>Até</th><th class="num">Adulto</th><th class="num">Criança</th><th></th></tr></thead><tbody>${per.map(p=>`<tr><td>${esc(p.nome||"")}</td><td>${brd(p.data_inicio)}</td><td>${brd(p.data_fim)}</td><td class="num">${brl(p.valor_adulto)}</td><td class="num">${brl(p.valor_crianca)}</td><td class="ac"><button data-a="perEd" data-id="${p.id}">Editar</button><button data-a="perDel" data-id="${p.id}">Remover</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhum período cadastrado.</p>`}</div>
-  <div class="card"><h3>Alertas de nova reserva</h3><form id="fal" class="fm"><label class="chk"><input type="checkbox" name="ativo" ${CFGAL.ativo?"checked":""}> Alertas ativos</label><label class="chk"><input type="checkbox" name="som" ${CFGAL.som?"checked":""}> Sinal sonoro</label><label>Repetir o som a cada (segundos)<input name="seg" type="number" min="5" value="${CFGAL.intervalo_segundos||30}"></label><div class="fr">${["criador","gerente","atendente"].map(t=>`<label class="chk"><input type="checkbox" name="t_${t}" ${(CFGAL.tipos||[]).includes(t)?"checked":""}> ${NIVEL[t]}</label>`).join("")}</div><button class="pri">Salvar alertas</button></form></div>`;
-  $("#fa").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{const r=await upd("atividades","id=eq."+ATV.id,{nome:f.get("n").trim(),limite_pessoas:+f.get("l")});ATV=r[0];$(".brand").textContent=ATV.nome;msg("Atividade salva.")}catch(er){msg(er.message,1)}};
-  $("#ft").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),o={valor_adulto:+f.get("a"),valor_crianca:+f.get("c"),valor_cortesia:+f.get("o")||0};try{if(pad)await upd("tarifas","id=eq."+pad.id,o);else await ins("tarifas",{...o,atividade_id:ATV.id,tipo:"padrao",nome:"Padrão"});msg("Valor padrão salvo.");go("cfg")}catch(er){msg(er.message,1)}};
-  $("#fal").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const v={ativo:!!f.get("ativo"),som:!!f.get("som"),intervalo_segundos:Math.max(5,+f.get("seg")||30),tipos:["criador","gerente","atendente"].filter(t=>f.get("t_"+t))};try{await upd("configuracoes","chave=eq.alertas",{valor:v,atualizado_em:new Date().toISOString()});CFGAL=v;msg("Alertas salvos.")}catch(er){msg(er.message,1)}};
+async function vcUedit(){
+  AGS=await rest("agencias?select=*&order=nome_fantasia");
+  const u=(await rest("usuarios?select=*&id=eq."+sub.uid))[0];
+  if(!u){$("#main").innerHTML=cfgTop("c_uedit")+vazio("Usuário não encontrado.");return}
+  const podeTipo=ME.tipo==="criador"&&u.id!==ME.id;
+  $("#main").innerHTML=cfgTop("c_uedit")+`<div class="card"><form id="cf" class="fm"><p>E-mail (login): <b>${esc(u.email)}</b></p>
+  <label>Nome<input name="n" value="${esc(u.nome)}" required></label>
+  <label>Nível${podeTipo?`<select name="t" id="ut">${["agencia","atendente","gerente","criador"].map(t=>`<option value="${t}"${t===u.tipo?" selected":""}>${NIVEL[t]}</option>`).join("")}</select>`:`<input value="${NIVEL[u.tipo]}" disabled><input type="hidden" name="t" id="ut" value="${u.tipo}">`}</label>
+  <label id="ual">Agência<select name="a">${optAg(u.agencia_id)}</select></label>
+  <label>Status<select name="st"${u.id===ME.id?" disabled":""}><option value="1"${u.ativo?" selected":""}>Ativo</option><option value="0"${u.ativo?"":" selected"}>Desativado</option></select></label>
+  <label>Nova senha (opcional, mín. 8)<input name="s" type="password" minlength="8" autocomplete="new-password"></label><label>Confirmar nova senha<input name="s2" type="password" autocomplete="new-password"></label>
+  <p class="err" id="merr"></p><button class="pri">Salvar</button></form></div>`;
+  const sy=()=>{$("#ual").style.display=$("#ut").value==="agencia"?"":"none"};$("#ut").onchange=sy;sy();
+  $("#cf").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),t=f.get("t");
+    if(f.get("s")&&f.get("s")!==f.get("s2"))return $("#merr").textContent="As senhas não conferem.";
+    if(t==="agencia"&&!f.get("a"))return $("#merr").textContent="Escolha a agência do usuário.";
+    const o={nome:f.get("n").trim(),tipo:t,agencia_id:t==="agencia"?f.get("a"):null};
+    if(u.id!==ME.id)o.ativo=f.get("st")==="1";
+    try{await upd("usuarios","id=eq."+u.id,o);if(f.get("s"))await fnUsr({acao:"senha",id:u.id,senha:f.get("s")});msg("Usuário salvo.")}catch(er){$("#merr").textContent=er.message}};
 }
-const campoPer=p=>{p=p||{};return `<label>Nome (ex.: Alta temporada)<input name="nome" required value="${esc(p.nome||"")}"></label><label>De<input name="di" type="date" required value="${p.data_inicio||""}"></label><label>Até<input name="df" type="date" required value="${p.data_fim||""}"></label><label>Adulto (R$)<input name="a" type="number" step="0.01" min="0" required value="${p.valor_adulto??""}"></label><label>Criança (R$)<input name="c" type="number" step="0.01" min="0" required value="${p.valor_crianca??""}"></label><label>Cortesia (R$)<input name="o" type="number" step="0.01" min="0" value="${p.valor_cortesia??0}"></label>`};
-const lerPer=f=>({nome:f.get("nome").trim(),data_inicio:f.get("di"),data_fim:f.get("df"),valor_adulto:+f.get("a"),valor_crianca:+f.get("c"),valor_cortesia:+f.get("o")||0});
 
-const VIEWS={agenda:vAgenda,reservas:vReservas,mp:vMp,fin:vFin,ags:vAgs,usr:vUsr,cfg:vCfg};
+const VIEWS={home:vHome,agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
+  f_faturas:vFaturas,f_gerar:vGerar,f_valor:vValor,f_tarifa:vTarifa,f_saldos:vSaldos,f_vendas:vVendas,f_cc:vCC,f_mp:vMpConf,
+  ag_cad:vAgCad,ags:vAgs,ag_rel:vAgRel,
+  c_menu:vcMenu,c_tema:vcTema,c_limite:vcLimite,c_atv:vcAtv,c_alertas:vcAlertas,c_pers:vcPers,c_horarios:vcHorarios,c_usuarios:vcUsuarios,c_ucad:vcUcad,c_ulist:vcUlist,c_ulista:vcUlista,c_uedit:vcUedit};
 
 /* ================= Ações (cliques) ================= */
-const sel=(id,opts)=>`<select name="${id}" required>${opts}</select>`;
 const A={
   fechar:()=>dlg.close(),
   menu:()=>$("#kd").classList.toggle("open"),
@@ -449,17 +689,17 @@ const A={
 
   /* multiponto */
   verComp:async d=>{try{const j=await http("/storage/v1/object/sign/comprovantes-mp/"+d.p,{method:"POST",body:{expiresIn:600}});const u=API+"/storage/v1"+j.signedURL;info("Comprovante",/\.pdf$/i.test(d.p)?`<p><a href="${u}" target="_blank" rel="noopener">Abrir PDF</a></p>`:`<img src="${u}" alt="comprovante">`)}catch(e){alert(e.message)}},
-  mpOk:d=>ask("Aprovar comprovante",`<label>Valor conferido (R$)<input name="v" type="number" step="0.01" min="0.01" value="${d.v}" required></label>`,"Aprovar e lançar",async f=>{await rpc("conferir_recebimento_mp",{p_id:d.id,p_aprovar:true,p_valor:+f.get("v"),p_motivo:null});go("fin")}),
-  mpNo:d=>ask("Recusar comprovante",`<label>Motivo<input name="m" required></label>`,"Recusar",async f=>{await rpc("conferir_recebimento_mp",{p_id:d.id,p_aprovar:false,p_valor:null,p_motivo:f.get("m")});go("fin")}),
+  mpOk:d=>ask("Aprovar comprovante",`<label>Valor conferido (R$)<input name="v" type="number" step="0.01" min="0.01" value="${d.v}" required></label>`,"Aprovar e lançar",async f=>{await rpc("conferir_recebimento_mp",{p_id:d.id,p_aprovar:true,p_valor:+f.get("v"),p_motivo:null});go("f_mp")}),
+  mpNo:d=>ask("Recusar comprovante",`<label>Motivo<input name="m" required></label>`,"Recusar",async f=>{await rpc("conferir_recebimento_mp",{p_id:d.id,p_aprovar:false,p_valor:null,p_motivo:f.get("m")});go("f_mp")}),
 
   /* financeiro */
-  finTab:d=>{sub.fin=d.k;go("fin")},
+  finTab:d=>{sub.fin=d.k;go(view)},
   extrato:async d=>{try{const l=await rest("lancamentos?select=*&agencia_id=eq."+d.id+"&order=criado_em.desc&limit=200");const T={debito:"Débito",credito:"Crédito",estorno:"Estorno"};info("Extrato — "+esc(agNome(d.id)),l.length?`<div class="scroll"><table class="tb" style="min-width:0"><thead><tr><th>Data</th><th>Descrição</th><th class="num">Valor</th></tr></thead><tbody>${l.map(x=>`<tr><td>${brd(x.criado_em)}</td><td>${T[x.tipo]} — ${esc(x.descricao||"")}</td><td class="num">${x.tipo==="debito"?"":"−"}${brl(x.valor)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Sem lançamentos.</p>`)}catch(e){alert(e.message)}},
-  credito:async d=>{const fp=await rest("formas_pagamento?select=*&ativa=eq.true&order=nome");ask("Lançar crédito — "+esc(agNome(d.id)),`<label>Valor (R$)<input name="v" type="number" step="0.01" min="0.01" required></label><label>Forma de pagamento${sel("fp",fp.map(f=>`<option value="${f.id}">${esc(f.nome)}</option>`).join(""))}</label><label>Descrição<input name="d" value="Pagamento recebido"></label>`,"Lançar",async f=>{await ins("lancamentos",{agencia_id:d.id,tipo:"credito",valor:+f.get("v"),forma_pagamento_id:f.get("fp"),descricao:f.get("d")||"Crédito"});go("fin")})},
-  fatura:async d=>{try{await rpc("gerar_fatura",{p_agencia:d.id});sub.fin="faturas";go("fin")}catch(e){msg(e.message,1)}},
+  credito:async d=>{const fp=await rest("formas_pagamento?select=*&ativa=eq.true&order=nome");ask("Lançar crédito — "+esc(agNome(d.id)),`<label>Valor (R$)<input name="v" type="number" step="0.01" min="0.01" required></label><label>Forma de pagamento${sel("fp",fp.map(f=>`<option value="${f.id}">${esc(f.nome)}</option>`).join(""))}</label><label>Descrição<input name="d" value="Pagamento recebido"></label>`,"Lançar",async f=>{await ins("lancamentos",{agencia_id:d.id,tipo:"credito",valor:+f.get("v"),forma_pagamento_id:f.get("fp"),descricao:f.get("d")||"Crédito"});go(view)})},
+  fatura:async d=>{try{await rpc("gerar_fatura",{p_agencia:d.id});go("f_faturas")}catch(e){msg(e.message,1)}},
   bloq:d=>{const bloq=d.b==="true";if(bloq){ask("Desbloquear agência?",`<p class="sub">${esc(agNome(d.id))} voltará a poder reservar.</p>`,"Desbloquear",async()=>{await upd("agencias","id=eq."+d.id,{bloqueada:false,motivo_bloqueio:null});AGS=await rest("agencias?select=*&order=nome_fantasia");go(view)})}else{ask("Bloquear agência",`<p class="sub">${esc(agNome(d.id))} não poderá criar reservas.</p><label>Motivo<input name="m" placeholder="ex.: inadimplência"></label>`,"Bloquear",async f=>{await upd("agencias","id=eq."+d.id,{bloqueada:true,motivo_bloqueio:f.get("m")||null});AGS=await rest("agencias?select=*&order=nome_fantasia");go(view)})}},
   verFat:async d=>{try{const l=await rest("fatura_reservas?select=*&fatura_id=eq."+d.id+"&order=data");info("Fatura nº "+d.n,l.length?`<div class="scroll"><table class="tb" style="min-width:0"><thead><tr><th>Nº</th><th>Data</th><th>Turista</th><th class="num">Valor</th></tr></thead><tbody>${l.map(x=>`<tr><td>${x.reserva_numero}</td><td>${brd(x.data)} ${hh(x.horario)}</td><td>${esc(x.turista)}</td><td class="num">${brl(x.valor)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Sem reservas.</p>`)}catch(e){alert(e.message)}},
-  fatPaga:async d=>{try{await upd("faturas","id=eq."+d.id,{status:"paga"});go("fin")}catch(e){msg(e.message,1)}},
+  fatPaga:async d=>{try{await upd("faturas","id=eq."+d.id,{status:"paga"});go("f_faturas")}catch(e){msg(e.message,1)}},
 
   /* agências */
   agNova:()=>ask("Nova agência",campoAg(),"Cadastrar",async f=>{await ins("agencias",lerAg(f));go("ags")}),
@@ -475,14 +715,31 @@ const A={
 
   /* configurações */
   salvaHor:async()=>{try{const mud=[...document.querySelectorAll("[data-h]")].filter(c=>c.checked!==HOR.find(h=>h.id===c.dataset.h).ativo);await Promise.all(mud.map(c=>upd("horarios_operacao","id=eq."+c.dataset.h,{ativo:c.checked})));msg(mud.length?"Horários salvos.":"Nada mudou.");HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario")}catch(e){msg(e.message,1)}},
-  perNovo:()=>ask("Novo período",campoPer(),"Cadastrar",async f=>{await ins("tarifas",{...lerPer(f),atividade_id:ATV.id,tipo:"periodo"});go("cfg")}),
-  perEd:d=>ask("Editar período",campoPer(RES.tar[d.id]),"Salvar",async f=>{await upd("tarifas","id=eq."+d.id,lerPer(f));go("cfg")}),
-  perDel:d=>ask("Remover período?",`<p class="sub">${esc(RES.tar[d.id].nome||"")} deixa de valer. Reservas já feitas mantêm o valor.</p>`,"Remover",async()=>{await upd("tarifas","id=eq."+d.id,{ativa:false});go("cfg")}),
+  perNovo:()=>ask("Novo período",campoPer(),"Cadastrar",async f=>{await ins("tarifas",{...lerPer(f),atividade_id:ATV.id,tipo:"periodo"});go("f_tarifa")}),
+  perEd:d=>ask("Editar período",campoPer(RES.tar[d.id]),"Salvar",async f=>{await upd("tarifas","id=eq."+d.id,lerPer(f));go("f_tarifa")}),
+  perDel:d=>ask("Remover período?",`<p class="sub">${esc(RES.tar[d.id].nome||"")} deixa de valer. Reservas já feitas mantêm o valor.</p>`,"Remover",async()=>{await upd("tarifas","id=eq."+d.id,{ativa:false});go("f_tarifa")}),
 };
+Object.assign(A,{
+  dd:(d,b)=>{const dr=b.nextElementSibling,ab=dr.classList.contains("open");document.querySelectorAll(".drop.open").forEach(x=>x.classList.remove("open"));if(!ab)dr.classList.add("open")},
+  menu:(d,b)=>{const dr=$("#kd"),ab=dr.classList.contains("open");document.querySelectorAll(".drop.open").forEach(x=>x.classList.remove("open"));if(!ab)dr.classList.add("open")},
+  ir:d=>go(d.v),
+  home:()=>go("home"),
+  cfg:()=>go("c_menu"),
+  nova:async()=>{await go("agenda");const i=$("#adt");if(i){i.scrollIntoView({block:"center"});i.focus()}},
+  hconf:async d=>{try{await upd("reservas","id=eq."+d.id,{status:"confirmada"});go("home")}catch(e){alert(e.message)}},
+  abrirCC:d=>{sub.ccag=d.id;go("f_cc")},
+  agrel:d=>{sub.agrel=d.id;go("ag_rel")},
+  uedit:d=>{sub.uid=d.id;go("c_uedit")},
+  imprimir:()=>window.print(),
+  testeAlerta:()=>beep(),
+  persCores:async()=>{try{await salvaPers({cor:$("#pcor").value,fundo:$("#pfundo").value});msg("Cores aplicadas.")}catch(e){msg(e.message,1)}},
+  persDel:async d=>{try{await salvaPers(d.k==="cores"?{cor:null,fundo:null}:{[d.k]:null});go("c_pers")}catch(e){msg(e.message,1)}},
+});
 document.addEventListener("click",e=>{
   unlockAudio();
   const b=e.target.closest("[data-a]");
-  if(!b){const kd=$("#kd");if(kd&&!e.target.closest(".kb"))kd.classList.remove("open");return}
+  if(!e.target.closest(".dd,.kb"))document.querySelectorAll(".drop.open").forEach(x=>x.classList.remove("open"));
+  if(!b)return;
   const f=A[b.dataset.a];if(f)f(b.dataset,b);
 });
 
@@ -509,7 +766,7 @@ async function pollAlertas(){
     novos.forEach(a=>vistos.add(a.id));ultimoBeep=Date.now();if(CFGAL.som)beep();
     const a=novos[0],r=a.reservas;
     try{if(r&&"Notification" in window&&Notification.permission==="granted")new Notification("Nova reserva nº "+r.numero,{body:`${r.agencias?r.agencias.nome_fantasia:""} · ${r.turista} · ${brd(r.data)} ${hh(r.horario)}`,tag:a.id,requireInteraction:true})}catch(e){}
-    if(view==="agenda"&&$("#msg"))go("agenda");
+    if(view==="agenda"||view==="home")go(view);
   }
   desenhaAlertas();
 }
@@ -520,6 +777,7 @@ A.okAlerta=async d=>{try{await upd("alertas_reserva","id=eq."+d.id,{confirmado_e
 
 /* ================= Início ================= */
 if("serviceWorker" in navigator&&location.protocol.startsWith("http")){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+aplicaTema();
 boot();
 </script>
 </body>
