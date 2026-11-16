@@ -112,6 +112,10 @@ dialog img{max-width:100%;border-radius:10px}
 .dd{position:relative}
 .nav .drop{left:0;right:auto;top:100%}
 .top #logo{max-height:34px;max-width:120px;object-fit:contain}
+.uinfo{font-size:.75rem;line-height:1.2;color:var(--muted);text-align:right}.uinfo b{color:var(--text)}
+.dia{background:var(--card);border:1px solid color-mix(in srgb,var(--ac) 45%,var(--bar));border-radius:14px;margin:10px 0;overflow:hidden}
+.dh{background:var(--bar);text-align:center;padding:8px}.dh small{color:var(--muted);display:block}
+.db{padding:6px 10px}.nada{text-align:center;color:var(--muted);margin:10px 0}
 .mini{border:0;background:var(--bar);color:var(--text);border-radius:999px;padding:5px 12px}
 .mini:hover{filter:brightness(.95)}
 .badge{border-radius:999px;padding:1px 10px;font-size:.75rem}.badge.bq{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
@@ -277,7 +281,7 @@ async function boot(){
   if(!ME)return telaSemPerfil();
   if(!ME.ativo)return telaSemPerfil("Seu acesso foi desativado. Fale com o responsável.");
   try{await carregaBase()}catch(e){return telaLogin(e.message)}
-  view=ME.tipo==="agencia"?"agenda":"home";cfgMode=false;day=hoje();sub={};montaApp();iniciaAlertas();
+  view="home";cfgMode=false;day=hoje();sub={};montaApp();iniciaAlertas();
 }
 async function carregaBase(){
   const [a,ag,cf]=await Promise.all([
@@ -289,10 +293,10 @@ async function carregaBase(){
   HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario");
 }
 const GEST=[["home","Home"],["agenda","Mapa de vagas"],["Reservas",[["reservas","Listar reservas"],["registros","Lista de registros"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_tarifa","Tarifário"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ag_cad","Cadastrar agências"],["ags","Lista de agências"]]]];
-const MENU={criador:GEST,gerente:GEST,atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Reservas"]],agencia:[["agenda","Agenda"],["reservas","Minhas reservas"],["mp","Multiponto"]]};
+const MENU={criador:GEST,gerente:GEST,atendente:[["home","Home"],["agenda","Mapa de vagas"],["reservas","Reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"],["mp","Multiponto"]]};
 const navHtml=()=>MENU[ME.tipo].map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
-  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${ME.tipo==="agencia"?`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${esc(agNome(ME.agencia_id))}</span>`:""}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
   aplicaPers();
 }
 function montaApp(){
@@ -326,7 +330,7 @@ function acoes(r){
   b.push(`<button data-a="mover" data-id="${r.id}">↔ Mover</button>`,`<button data-a="cancelar" data-id="${r.id}">✕ Cancelar</button>`);
   return b.join("");
 }
-const chip=r=>`<div class="r${r.status==="cancelada"?" del":""}"><span><small>Reserva</small> ${r.numero}</span><span><small>Adulto</small> ${r.adultos}</span><span><small>Chd</small> ${r.criancas}</span><span><small>Cort</small> ${r.cortesias}</span>${equipe()?`<span><small>Agência</small> ${esc(agNome(r.agencia_id))}</span>`:""}<span><small>Turista</small> ${esc(r.turista)}</span><span><small>Valor</small> ${brl(r.valor_total)}</span><span class="st st-${r.status}">${r.status}</span><span class="ac">${acoes(r)}</span></div>`;
+const chip=(r,hora)=>`<div class="r${r.status==="cancelada"?" del":""}"><span><small>Reserva</small> ${r.numero}</span>${hora?`<span><small>Hora</small> ${hh(r.horario)}</span>`:""}<span><small>Adulto</small> ${r.adultos}</span><span><small>Chd</small> ${r.criancas}</span><span><small>Cort</small> ${r.cortesias}</span>${equipe()?`<span><small>Agência</small> ${esc(agNome(r.agencia_id))}</span>`:""}<span><small>Turista</small> ${esc(r.turista)}</span><span><small>Valor</small> ${brl(r.valor_total)}</span><span class="st st-${r.status}">${r.status}</span><span class="ac">${acoes(r)}</span></div>`;
 
 /* ================= Agenda ================= */
 async function vAgenda(){
@@ -337,7 +341,7 @@ async function vAgenda(){
   const dt=new Date(d+"T12:00:00");
   const linhas=vagas.filter(v=>equipe()||v.ativo||res.some(r=>hh(r.horario)===hh(v.horario))).map(v=>{
     const h=hh(v.horario),rs=res.filter(r=>hh(r.horario)===h),lot=v.ativo&&v.livres===0;
-    return `<div class="row${v.ativo||rs.length?"":" off"}"><div class="h${v.ativo?" hab":""}">${h}</div><div class="rs">${rs.map(chip).join("")}</div><div class="t${lot?" lot":""}">${v.ativo?`<b>${v.ocupadas}/${v.limite}</b><small>${lot?"lotado":v.livres+" livres"}</small>`:(v.ocupadas||"")}</div></div>`;
+    return `<div class="row${v.ativo||rs.length?"":" off"}"><div class="h${v.ativo?" hab":""}">${h}</div><div class="rs">${rs.map(r=>chip(r)).join("")}</div><div class="t${lot?" lot":""}">${v.ativo?`<b>${v.ocupadas}/${v.limite}</b><small>${lot?"lotado":v.livres+" livres"}</small>`:(v.ocupadas||"")}</div></div>`;
   }).join("");
   $("#main").innerHTML=`<div class="datebar"><button data-a="dia" data-n="-1">‹</button><input type="date" id="dt" value="${d}"><button data-a="dia" data-n="1">›</button></div>
   <p class="dtxt">${dt.getDate()} de ${cap(dt.toLocaleDateString("pt-BR",{month:"long"}))} de ${dt.getFullYear()}, ${cap(dt.toLocaleDateString("pt-BR",{weekday:"long"}))}</p>
@@ -350,7 +354,7 @@ async function vAgenda(){
 /* ================= Lista / busca ================= */
 async function vReservas(){
   sub.ini=sub.ini||somaDias(hoje(),-30);sub.fim=sub.fim||somaDias(hoje(),60);sub.q=sub.q||"";
-  $("#main").innerHTML=`<h2>${ME.tipo==="agencia"?"Minhas reservas":"Reservas"}</h2>
+  $("#main").innerHTML=`<h2>${ME.tipo==="agencia"?"Buscar reservas":"Reservas"}</h2>
   <form class="bar" id="bf"><label>De<input type="date" id="bi" value="${sub.ini}" required></label><label>Até<input type="date" id="bfim" value="${sub.fim}" required></label><label>Nome ou nº<input id="bq" value="${esc(sub.q)}" placeholder="turista ou número"></label><button class="pri">Buscar</button></form>
   <div class="msg" id="msg"></div><div id="res"></div>`;
   $("#bf").onsubmit=e=>{e.preventDefault();sub.ini=$("#bi").value;sub.fim=$("#bfim").value;sub.q=$("#bq").value;lista()};
@@ -651,12 +655,38 @@ async function vcUedit(){
     try{await upd("usuarios","id=eq."+u.id,o);if(f.get("s"))await fnUsr({acao:"senha",id:u.id,senha:f.get("s")});msg("Usuário salvo.")}catch(er){$("#merr").textContent=er.message}};
 }
 
-const VIEWS={home:vHome,agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
+async function vHomeAg(){
+  const d0=hoje(),d6=somaDias(d0,6);
+  const rs=await rest(`reservas?select=*&atividade_id=eq.${ATV.id}&data=gte.${d0}&data=lte.${d6}&status=neq.cancelada&order=data,horario,numero`);
+  const dias=[0,1,2,3,4,5,6].map(n=>{
+    const d=somaDias(d0,n),dt=new Date(d+"T12:00:00"),tit=n===0?"Hoje":n===1?"Amanhã":cap(dt.toLocaleDateString("pt-BR",{weekday:"long"})),l=rs.filter(r=>r.data===d);
+    return `<div class="dia"><div class="dh"><b>${tit}</b><small>(${brd(d)})</small></div><div class="db">${l.length?l.map(r=>chip(r,true)).join(""):'<p class="nada">Não existem reservas!</p>'}</div></div>`;
+  }).join("");
+  $("#main").innerHTML=`<div class="card"><h3>Buscar reservas</h3><form id="hs" class="fr"><label>Nome do turista ou número da reserva<input name="q" required autocomplete="off"></label><label>&nbsp;<button class="pri">Buscar</button></label></form><p class="sub" style="text-align:left;margin:8px 0 0"><button type="button" class="lnk" data-a="nav" data-v="reservas">Buscar por período</button></p></div>
+  <div class="card"><h3>Consulte a disponibilidade dos passeios!</h3><div class="fr"><label>Data<input type="date" id="ad" value="${d0}" min="${d0}"></label><label>Adultos<input type="number" id="aa" min="1" inputmode="numeric"></label><label>Crianças<input type="number" id="ac" min="0" value="0" inputmode="numeric"></label></div><p style="margin:12px 0 0"><button class="pri" data-a="consultarAg">Consultar</button></p></div>
+  <div class="msg" id="msg"></div>${dias}`;
+  $("#hs").onsubmit=e=>{e.preventDefault();sub={ini:somaDias(hoje(),-365),fim:somaDias(hoje(),365),q:new FormData(e.target).get("q").trim()};go("reservas")};
+}
+const VIEWS={home:()=>ME.tipo==="agencia"?vHomeAg():vHome(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,
   f_faturas:vFaturas,f_gerar:vGerar,f_valor:vValor,f_tarifa:vTarifa,f_saldos:vSaldos,f_vendas:vVendas,f_cc:vCC,f_mp:vMpConf,
   ag_cad:vAgCad,ags:vAgs,ag_rel:vAgRel,
   c_menu:vcMenu,c_tema:vcTema,c_limite:vcLimite,c_atv:vcAtv,c_alertas:vcAlertas,c_pers:vcPers,c_horarios:vcHorarios,c_usuarios:vcUsuarios,c_ucad:vcUcad,c_ulist:vcUlist,c_ulista:vcUlista,c_uedit:vcUedit};
 
 /* ================= Ações (cliques) ================= */
+async function consultaDisp(d,adt,chd,cort,volta){
+  const n=adt+chd+cort;
+  if(!d)return msg("Escolha a data.",1);
+  if(d<hoje())return msg("Escolha uma data de hoje em diante.",1);
+  if(adt<1)return msg("Informe ao menos 1 adulto.",1);
+  let hs;try{hs=await rpc("horarios_disponiveis",{p_atividade:ATV.id,p_data:d,p_pessoas:n})}catch(e){return msg(e.message,1)}
+  if(!hs.length)return msg(`Não há horários disponíveis para ${n} pessoa(s) em ${brd(d)}.`,1);
+  msg("");
+  const ags=AGS.filter(a=>!a.bloqueada&&a.ativa);
+  ask("Horários disponíveis",`<p class="sub">${esc(ATV.nome)} · ${brd(d)} · ${n} pessoa(s)</p>${hs.map(h=>`<label class="chk"><input type="radio" name="h" value="${hh(h.horario)}" required> ${hh(h.horario)}${h.recomendado?" <b>★ Recomendado</b>":""} <small>(${h.livres} vagas)</small></label>`).join("")}<label>Turista<input name="tur" required></label>${equipe()?`<label>Agência${sel("ag",`<option value="">Selecione uma agência</option>${ags.map(a=>`<option value="${a.id}">${esc(a.nome_fantasia)}</option>`).join("")}`)}</label>`:""}`,"Reservar",async f=>{
+    const r=await ins("reservas",{atividade_id:ATV.id,data:d,horario:f.get("h"),agencia_id:equipe()?f.get("ag"):ME.agencia_id,turista:f.get("tur").trim(),adultos:adt,criancas:chd,cortesias:cort});
+    await go(volta);msg(`Reserva nº ${r[0].numero} criada para ${brd(d)} às ${f.get("h")} — ${brl(r[0].valor_total)}.`);
+  });
+}
 const A={
   fechar:()=>dlg.close(),
   menu:()=>$("#kd").classList.toggle("open"),
@@ -666,19 +696,8 @@ const A={
   senha:()=>{$("#kd").classList.remove("open");ask("Alterar minha senha",`<label>Nova senha<input type="password" name="p" minlength="8" autocomplete="new-password" required></label>`,"Salvar",async f=>{await http("/auth/v1/user",{method:"PUT",body:{password:f.get("p")}})})},
   notif:async()=>{$("#kd").classList.remove("open");try{const p=await Notification.requestPermission();alert(p==="granted"?"Notificações ativadas.":"Notificações não permitidas neste navegador.")}catch(e){}},
 
-  consultar:async()=>{
-    const adt=+$("#adt").value||0,chd=+$("#chd").value||0,cort=+$("#cort").value||0,n=adt+chd+cort;
-    if(adt<1)return msg("Informe ao menos 1 adulto.",1);
-    let hs;try{hs=await rpc("horarios_disponiveis",{p_atividade:ATV.id,p_data:day,p_pessoas:n})}catch(e){return msg(e.message,1)}
-    if(!hs.length)return msg(`Não há horários disponíveis para ${n} pessoa(s).`,1);
-    msg("");
-    const ags=AGS.filter(a=>!a.bloqueada&&a.ativa);
-    ask("Horários disponíveis",`<p class="sub">${esc(ATV.nome)} · ${brd(day)} · ${n} pessoa(s)</p>${hs.map(h=>`<label class="chk"><input type="radio" name="h" value="${hh(h.horario)}" required> ${hh(h.horario)}${h.recomendado?" <b>★ Recomendado</b>":""} <small>(${h.livres} vagas)</small></label>`).join("")}<label>Turista<input name="tur" required></label>${equipe()?`<label>Agência${sel("ag",`<option value="">Selecione uma agência</option>${ags.map(a=>`<option value="${a.id}">${esc(a.nome_fantasia)}</option>`).join("")}`)}</label>`:""}`,"Reservar",async f=>{
-      const r=await ins("reservas",{atividade_id:ATV.id,data:day,horario:f.get("h"),agencia_id:equipe()?f.get("ag"):ME.agencia_id,turista:f.get("tur").trim(),adultos:adt,criancas:chd,cortesias:cort});
-      $("#adt").value="";$("#chd").value=0;$("#cort").value=0;
-      await go("agenda");msg(`Reserva nº ${r[0].numero} criada às ${f.get("h")} — ${brl(r[0].valor_total)}.`);
-    });
-  },
+  consultar:()=>consultaDisp(day,+$("#adt").value||0,+$("#chd").value||0,+$("#cort").value||0,"agenda"),
+  consultarAg:()=>consultaDisp($("#ad").value,+$("#aa").value||0,+$("#ac").value||0,0,"home"),
   status:async d=>{const r=RES[d.id];try{await upd("reservas","id=eq."+d.id,{status:r.status==="confirmada"?"pendente":"confirmada"});go(view)}catch(e){msg(e.message,1)}},
   pax:d=>{const r=RES[d.id];ask(`Reserva nº ${r.numero}: pessoas`,`<label>Adultos<input type="number" name="a" min="1" value="${r.adultos}" required></label><label>Crianças<input type="number" name="c" min="0" value="${r.criancas}"></label><label>Cortesias<input type="number" name="o" min="0" value="${r.cortesias}"></label>`,"Salvar",async f=>{await upd("reservas","id=eq."+d.id,{adultos:+f.get("a"),criancas:+f.get("c")||0,cortesias:+f.get("o")||0});go(view)})},
   mover:d=>{
