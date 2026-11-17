@@ -214,11 +214,13 @@ const upd=async(t,f,o)=>{const r=await http("/rest/v1/"+t+"?"+f,{method:"PATCH",
 const rpc=(n,a)=>http("/rest/v1/rpc/"+n,{method:"POST",body:a||{}});
 
 /* ================= Estado ================= */
-let ME=null,ATV=null,HOR=[],AGS=[],CFGAL={ativo:true,som:true,intervalo_segundos:30,tipos:["gerente","atendente"]};
+let ME=null,ATR=null,PLAT=false,ATV=null,HOR=[],AGS=[],CFGAL={ativo:true,som:true,intervalo_segundos:30,tipos:["gerente","atendente"]};
 let view="home",day=hoje(),sub={},RES={},mostraCanc=false,PERS={},cfgMode=false;
 const equipe=()=>["criador","gerente","atendente"].includes(ME.tipo);
 const gestao=()=>["criador","gerente"].includes(ME.tipo);
 const fin=()=>["criador","gerente","financeiro"].includes(ME.tipo);
+const rec=k=>!ATR||!ATR.recursos||ATR.recursos[k]!==false;
+const RECMAP={mp:"multiponto",f_mp:"multiponto",estat:"estatisticas",agenda:"mapa_vagas",registros:"registros"};
 const agGer=()=>ME.tipo==="agencia"&&ME.gerente_agencia===true;
 const agNome=id=>{const a=AGS.find(x=>x.id===id);return a?a.nome_fantasia:"—"};
 
@@ -237,8 +239,8 @@ const info=(titulo,html)=>{dlg.innerHTML=`<div class="fm"><h3>${titulo}</h3>${ht
 const msg=(t,erro)=>{const m=$("#msg");if(m){m.textContent=t||"";m.className="msg"+(erro?" err":"")}};
 
 /* ================= Login ================= */
-function telaLogin(aviso,modo){
-  modo=modo||"entrar";
+function telaLogin(aviso){
+  const modo="entrar";
   $("#app").innerHTML=`<div class="login"><aside class="side"><div class="lgbrand">Sistema de reservas</div><div class="lgwel"><h2>${modo==="entrar"?"Bem-vindo":"Primeiro acesso"}</h2><p>Reservas e passeios em um só lugar.</p></div></aside><main class="main"><div class="box">
   <h1>Sistema de reservas</h1><p>${modo==="entrar"?"Entre com seu e-mail e senha":"Primeiro acesso: crie o login do Criador do sistema"}</p>
   <form id="lf">
@@ -247,8 +249,8 @@ function telaLogin(aviso,modo){
     <p class="err" id="lm">${esc(aviso||"")}</p>
     <button class="pri">${modo==="entrar"?"Entrar":"Criar login"}</button>
   </form>
-  <button class="lk" id="lt">${modo==="entrar"?"Primeiro acesso do sistema":"Já tenho cadastro"}</button></div></main></div>`;
-  $("#lt").onclick=()=>telaLogin("",modo==="entrar"?"criar":"entrar");
+  </div></main></div>`;
+  brandLogin();
   $("#lf").onsubmit=async e=>{
     e.preventDefault();const b=$("#lf .pri");b.disabled=true;$("#lm").textContent="";
     const email=$("#le").value.trim(),senha=$("#ls").value;
@@ -266,15 +268,23 @@ function telaLogin(aviso,modo){
 function telaSemPerfil(motivo){
   $("#app").innerHTML=`<div class="login"><aside class="side"><div class="lgbrand">Sistema de reservas</div></aside><main class="main"><div class="box"><h1>Acesso não liberado</h1>
   <p>${esc(motivo||"Seu login existe, mas ainda não tem um perfil neste sistema.")}</p>
-  <form id="pf"><label>Se este é o primeiro acesso do sistema, informe seu nome para virar o Criador:<input id="pn" placeholder="Seu nome"></label>
-  <p class="err" id="lm"></p><button class="pri">Ativar como Criador</button></form>
   <button class="lk" id="so">Sair</button></div></main></div>`;
   $("#so").onclick=sair;
-  $("#pf").onsubmit=async e=>{e.preventDefault();try{await rpc("ativar_primeiro_criador",{p_nome:$("#pn").value});await boot()}catch(er){$("#lm").textContent=er.message}};
 }
 function sair(){saveS(null);ME=null;clearInterval(tAl);clearInterval(tBeep);$("#alertas").innerHTML="";telaLogin()}
 
 /* ================= Inicialização ================= */
+async function brandLogin(){
+  const slug=(new URLSearchParams(location.search).get("a")||ls.get("atr_slug")||"").toLowerCase();if(!slug)return;
+  try{
+    const j=await rpc("atrativo_publico",{p_slug:slug});if(!j)return;
+    ls.set("atr_slug",j.slug);const p=j.pers||{},lg=document.querySelector(".login");if(!lg)return;
+    document.querySelectorAll(".lgbrand,.box h1").forEach(e=>e.textContent=j.nome);
+    if(p.bg)lg.style.backgroundImage=`url(${p.bg})`;
+    if(p.cor){const r=document.documentElement.style;r.setProperty("--ac",p.cor);r.setProperty("--soft","color-mix(in srgb,"+p.cor+" 16%,transparent)")}
+    document.title=j.nome;
+  }catch(e){}
+}
 async function boot(){
   if(!S)return telaLogin();
   try{
@@ -290,15 +300,19 @@ async function carregaBase(){
     rest("atividades?select=*&ativa=eq.true&order=criado_em&limit=1"),
     rest("agencias?select=*&order=nome_fantasia"),
     rest("configuracoes?select=*&chave=in.(alertas,personalizacao)")]);
-  ATV=a[0];if(!ATV)throw new Error("Nenhuma atividade cadastrada no banco");
+  ATV=a[0];if(!ATV)throw new Error("Nenhuma atividade disponível: atrativo sem cadastro ou suspenso");
+  ATR=(await rest("atrativos?select=*&id=eq."+ME.atrativo_id))[0]||null;if(ATR)ls.set("atr_slug",ATR.slug);
+  try{PLAT=!!(await rpc("sou_plataforma"))}catch(e){PLAT=false}
   AGS=ag;cf.forEach(c=>{if(c.chave==="alertas")CFGAL=c.valor;if(c.chave==="personalizacao")PERS=c.valor||{}});
   HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario");
 }
 const GEST=[["home","Home"],["agenda","Mapa de vagas"],["Reservas",[["reservas","Listar reservas"],["registros","Lista de registros"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_tarifa","Tarifário"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ag_cad","Cadastrar agências"],["ags","Lista de agências"]]]];
 const MENU={criador:GEST,gerente:GEST,financeiro:[["home","Home"],["Reservas",[["reservas","Listar reservas"],["estat","Estatísticas"]]],["Financeiro",[["f_faturas","Listar Faturas"],["f_gerar","Gerar Faturas"],["f_valor","Inserir Valor"],["f_saldos","Relatório de saldos"],["f_vendas","Relatório de vendas"],["f_cc","Conta corrente"],["f_mp","Conferir multiponto"]]],["Agências",[["ags","Lista de agências"]]]],atendente:[["home","Home"],["reservas","Buscar reservas"]],agencia:[["home","Home"],["reservas","Buscar reservas"]],agenciaGer:[["home","Home"],["reservas","Buscar reservas"],["Financeiro",[["a_cc","Conta corrente"],["a_fat","Faturas"],["mp","Multiponto"]]],["a_usr","Usuários"]]};
-const navHtml=()=>MENU[agGer()?"agenciaGer":ME.tipo].map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
+const okV=v=>!RECMAP[v]||rec(RECMAP[v]);
+const menuAtual=()=>MENU[agGer()?"agenciaGer":ME.tipo].map(it=>Array.isArray(it[1])?[it[0],it[1].filter(([v])=>okV(v))]:it).filter(it=>Array.isArray(it[1])?it[1].length:okV(it[0]));
+const navHtml=()=>menuAtual().map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
-  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button></div></div>`}</div>`;
   aplicaPers();
 }
 function montaApp(){
@@ -333,7 +347,7 @@ function acoes(r){
   b.push(`<button data-a="mover" data-id="${r.id}">↔ Mover</button>`,`<button data-a="cancelar" data-id="${r.id}">✕ Cancelar</button>`);
   return b.join("");
 }
-const chip=(r,hora)=>`<div class="r${r.status==="cancelada"?" del":""}"><span><small>Reserva</small> ${r.numero}</span>${hora?`<span><small>Hora</small> ${hh(r.horario)}</span>`:""}<span><small>Adulto</small> ${r.adultos}</span><span><small>Chd</small> ${r.criancas}</span>${gestao()?`<span><small>Cort</small> ${r.cortesias}</span>`:""}${equipe()?`<span><small>Agência</small> ${esc(agNome(r.agencia_id))}</span>`:""}<span><small>Turista</small> ${esc(r.turista)}</span><span><small>Valor</small> ${brl(r.valor_total)}</span><span class="st st-${r.status}">${r.status}</span><span class="ac">${acoes(r)}</span></div>`;
+const chip=(r,hora)=>`<div class="r${r.status==="cancelada"?" del":""}"><span><small>Reserva</small> ${r.numero}</span>${hora?`<span><small>Hora</small> ${hh(r.horario)}</span>`:""}<span><small>Adulto</small> ${r.adultos}</span><span><small>Chd</small> ${r.criancas}</span>${gestao()&&rec("cortesia")?`<span><small>Cort</small> ${r.cortesias}</span>`:""}${equipe()?`<span><small>Agência</small> ${esc(agNome(r.agencia_id))}</span>`:""}<span><small>Turista</small> ${esc(r.turista)}</span><span><small>Valor</small> ${brl(r.valor_total)}</span><span class="st st-${r.status}">${r.status}</span><span class="ac">${acoes(r)}</span></div>`;
 
 /* ================= Agenda ================= */
 async function vAgenda(){
@@ -348,7 +362,7 @@ async function vAgenda(){
   }).join("");
   $("#main").innerHTML=`<div class="datebar"><button data-a="dia" data-n="-1">‹</button><input type="date" id="dt" value="${d}"><button data-a="dia" data-n="1">›</button></div>
   <p class="dtxt">${dt.getDate()} de ${cap(dt.toLocaleDateString("pt-BR",{month:"long"}))} de ${dt.getFullYear()}, ${cap(dt.toLocaleDateString("pt-BR",{weekday:"long"}))}</p>
-  <div class="bar"><label>Adultos<input type="number" id="adt" min="1" inputmode="numeric"></label><label>Crianças<input type="number" id="chd" min="0" value="0" inputmode="numeric"></label><label>Cortesias<input type="number" id="cort" min="0" value="0" inputmode="numeric"></label><button class="pri" data-a="consultar">Consultar</button>${equipe()?`<label class="chk"><input type="checkbox" id="mc"${mostraCanc?" checked":""}> mostrar canceladas</label>`:""}</div>
+  <div class="bar"><label>Adultos<input type="number" id="adt" min="1" inputmode="numeric"></label><label>Crianças<input type="number" id="chd" min="0" value="0" inputmode="numeric"></label>${rec("cortesia")?`<label>Cortesias<input type="number" id="cort" min="0" value="0" inputmode="numeric"></label>`:""}<button class="pri" data-a="consultar">Consultar</button>${equipe()?`<label class="chk"><input type="checkbox" id="mc"${mostraCanc?" checked":""}> mostrar canceladas</label>`:""}</div>
   <div class="msg" id="msg"></div><div class="scroll"><div class="grade">${linhas||'<p class="vazio">Sem horários abertos.</p>'}</div></div>`;
   $("#dt").onchange=e=>{day=e.target.value||day;go("agenda")};
   const mc=$("#mc");if(mc)mc.onchange=e=>{mostraCanc=e.target.checked;go("agenda")};
@@ -475,7 +489,7 @@ async function vEstat(){
   const rs=await rest(`reservas?select=agencia_id,horario,adultos,criancas,cortesias,valor_total&atividade_id=eq.${ATV.id}&data=gte.${sub.pi}&data=lte.${sub.pf}&status=neq.cancelada&limit=5000`);
   const soma=f=>rs.reduce((s,r)=>s+f(r),0),qt=r=>r.adultos+r.criancas+r.cortesias,pess=soma(qt);
   const grupo=f=>{const m={};rs.forEach(r=>{const k=f(r);(m[k]=m[k]||{res:0,pess:0,v:0});m[k].res++;m[k].pess+=qt(r);m[k].v+=Number(r.valor_total)});return Object.entries(m).sort()};
-  $("#main").innerHTML=`<h2>Estatísticas</h2>${periodoBar()}<div class="kpis">${kpi("Reservas",rs.length)}${kpi("Pessoas",pess)}${kpi("Adultos",soma(r=>r.adultos))}${kpi("Crianças",soma(r=>r.criancas))}${kpi("Cortesias",soma(r=>r.cortesias))}${kpi("Média por reserva",rs.length?(pess/rs.length).toFixed(1).replace(".",","):"0")}</div>`+(rs.length?`<h3>Por agência</h3>${tab(["Agência","Reservas","Pessoas","Vendas"],grupo(r=>agNome(r.agencia_id)).map(([k,g])=>[esc(k),g.res,g.pess,brl(g.v)]))}<h3>Por horário</h3>${tab(["Horário","Reservas","Pessoas"],grupo(r=>hh(r.horario)).map(([k,g])=>[k,g.res,g.pess]))}`:vazio("Sem dados no período."));
+  $("#main").innerHTML=`<h2>Estatísticas</h2>${periodoBar()}<div class="kpis">${kpi("Reservas",rs.length)}${kpi("Pessoas",pess)}${kpi("Adultos",soma(r=>r.adultos))}${kpi("Crianças",soma(r=>r.criancas))}${rec("cortesia")?kpi("Cortesias",soma(r=>r.cortesias)):""}${kpi("Média por reserva",rs.length?(pess/rs.length).toFixed(1).replace(".",","):"0")}</div>`+(rs.length?`<h3>Por agência</h3>${tab(["Agência","Reservas","Pessoas","Vendas"],grupo(r=>agNome(r.agencia_id)).map(([k,g])=>[esc(k),g.res,g.pess,brl(g.v)]))}<h3>Por horário</h3>${tab(["Horário","Reservas","Pessoas"],grupo(r=>hh(r.horario)).map(([k,g])=>[k,g.res,g.pess]))}`:vazio("Sem dados no período."));
   lerPeriodo();
 }
 
@@ -540,6 +554,14 @@ async function vAUsr(){
   const us=await rest("usuarios?select=*&agencia_id=eq."+ME.agencia_id+"&order=nome");RES.us=Object.fromEntries(us.map(u=>[u.id,u]));
   $("#main").innerHTML=`<h2>Usuários da agência</h2><div class="msg" id="msg"></div><div class="atalhos"><button class="pri" data-a="aNovoUsr">+ Novo usuário</button></div>`+
   tab(["Nome","E-mail (login)","Nível","Status",""],us.map(u=>[esc(u.nome),esc(u.email),u.gerente_agencia?"Gerente":"Usuário",`<span class="st st-${u.ativo?"ativa":"inativa"}">${u.ativo?"ativo":"desativado"}</span>`,u.gerente_agencia?"":`<span class="ac"><button data-a="usSenha" data-id="${u.id}">Nova senha</button><button data-a="usAtivo" data-id="${u.id}" data-v="${u.ativo}">${u.ativo?"Desativar":"Ativar"}</button></span>`]));
+}
+const RECS=[["cortesia","Cortesias nas reservas"],["multiponto","Multiponto (comprovantes)"],["estatisticas","Estatísticas"],["mapa_vagas","Mapa de vagas"],["registros","Lista de registros"]];
+async function vPAtr(){
+  if(!PLAT){$("#main").innerHTML=vazio("Sem permissão.");return}
+  const at=await rest("atrativos?select=*&order=criado_em");RES.atr=Object.fromEntries(at.map(x=>[x.id,x]));
+  const base=location.origin+location.pathname;
+  $("#main").innerHTML=`<h2>Atrativos</h2><p class="sub" style="text-align:left">Cada atrativo tem os próprios dados, usuários, agências, numeração e identidade visual. O endereço de acesso abre o login já com a marca dele.</p><div class="msg" id="msg"></div><div class="atalhos"><button class="pri" data-a="pNovo">+ Novo atrativo</button></div>`+
+  tab(["Atrativo","Endereço de acesso","Situação",""],at.map(x=>[esc(x.nome),`<small>${esc(base)}?a=${esc(x.slug)}</small>`,`<span class="st st-${x.ativo?"ativa":"inativa"}">${x.ativo?"ativo":"suspenso"}</span>`,`<span class="ac"><button data-a="pRec" data-id="${x.id}">Recursos</button><button data-a="pAtivo" data-id="${x.id}" data-v="${x.ativo}">${x.ativo?"Suspender":"Reativar"}</button></span>`]));
 }
 async function vMpConf(){
   const rc=await rest("recebimentos_mp?select=*,reservas(numero,turista)&order=criado_em.desc&limit=100");
@@ -609,7 +631,7 @@ function vcPers(){
 }
 async function salvaPers(novo){
   PERS={...PERS,...novo};Object.keys(PERS).forEach(k=>{if(PERS[k]==null)delete PERS[k]});
-  await http("/rest/v1/configuracoes",{method:"POST",body:{chave:"personalizacao",valor:PERS,atualizado_em:new Date().toISOString()},prefer:"resolution=merge-duplicates,return=representation"});
+  await http("/rest/v1/configuracoes",{method:"POST",body:{atrativo_id:ME.atrativo_id,chave:"personalizacao",valor:PERS,atualizado_em:new Date().toISOString()},prefer:"resolution=merge-duplicates,return=representation"});
   aplicaPers();
 }
 async function persImg(file,k,max,tipo){
@@ -684,7 +706,7 @@ async function vHomeAg(){
   <div class="msg" id="msg"></div>${dias}`;
   $("#hs").onsubmit=e=>{e.preventDefault();sub={ini:somaDias(hoje(),-365),fim:somaDias(hoje(),365),q:new FormData(e.target).get("q").trim()};go("reservas")};
 }
-const VIEWS={home:()=>fin()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,a_cc:vACC,a_fat:vFaturas,a_usr:vAUsr,
+const VIEWS={home:()=>fin()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,p_atr:vPAtr,a_cc:vACC,a_fat:vFaturas,a_usr:vAUsr,
   f_faturas:vFaturas,f_gerar:vGerar,f_valor:vValor,f_tarifa:vTarifa,f_saldos:vSaldos,f_vendas:vVendas,f_cc:vCC,f_mp:vMpConf,
   ag_cad:vAgCad,ags:vAgs,ag_rel:vAgRel,
   c_menu:vcMenu,c_tema:vcTema,c_limite:vcLimite,c_atv:vcAtv,c_alertas:vcAlertas,c_pers:vcPers,c_horarios:vcHorarios,c_usuarios:vcUsuarios,c_ucad:vcUcad,c_ulist:vcUlist,c_ulista:vcUlista,c_uedit:vcUedit};
@@ -713,10 +735,10 @@ const A={
   senha:()=>{$("#kd").classList.remove("open");ask("Alterar minha senha",`<label>Nova senha<input type="password" name="p" minlength="8" autocomplete="new-password" required></label>`,"Salvar",async f=>{await http("/auth/v1/user",{method:"PUT",body:{password:f.get("p")}})})},
   notif:async()=>{$("#kd").classList.remove("open");try{const p=await Notification.requestPermission();alert(p==="granted"?"Notificações ativadas.":"Notificações não permitidas neste navegador.")}catch(e){}},
 
-  consultar:()=>consultaDisp(day,+$("#adt").value||0,+$("#chd").value||0,+$("#cort").value||0,"agenda"),
+  consultar:()=>consultaDisp(day,+$("#adt").value||0,+$("#chd").value||0,+($("#cort")?$("#cort").value:0)||0,"agenda"),
   consultarAg:()=>consultaDisp($("#ad").value,+$("#aa").value||0,+$("#ac").value||0,+(($("#acor")||{}).value)||0,"home"),
   status:async d=>{const r=RES[d.id];try{await upd("reservas","id=eq."+d.id,{status:r.status==="confirmada"?"pendente":"confirmada"});go(view)}catch(e){msg(e.message,1)}},
-  pax:d=>{const r=RES[d.id];ask(`Reserva nº ${r.numero}: pessoas`,`<label>Adultos<input type="number" name="a" min="1" value="${r.adultos}" required></label><label>Crianças<input type="number" name="c" min="0" value="${r.criancas}"></label>${gestao()?`<label>Cortesias<input type="number" name="o" min="0" value="${r.cortesias}"></label>`:""}`,"Salvar",async f=>{await upd("reservas","id=eq."+d.id,{adultos:+f.get("a"),criancas:+f.get("c")||0,cortesias:gestao()?(+f.get("o")||0):r.cortesias});go(view)})},
+  pax:d=>{const r=RES[d.id];ask(`Reserva nº ${r.numero}: pessoas`,`<label>Adultos<input type="number" name="a" min="1" value="${r.adultos}" required></label><label>Crianças<input type="number" name="c" min="0" value="${r.criancas}"></label>${gestao()&&rec("cortesia")?`<label>Cortesias<input type="number" name="o" min="0" value="${r.cortesias}"></label>`:""}`,"Salvar",async f=>{await upd("reservas","id=eq."+d.id,{adultos:+f.get("a"),criancas:+f.get("c")||0,cortesias:gestao()&&rec("cortesia")?(+f.get("o")||0):r.cortesias});go(view)})},
   mover:d=>{
     const r=RES[d.id],n=r.adultos+r.criancas+r.cortesias;
     ask(`Mover reserva nº ${r.numero}`,`<label>Nova data<input type="date" name="d" id="md" value="${r.data}" required></label><label>Horário<select name="h" id="mh" required></select></label>`,"Mover",async f=>{await upd("reservas","id=eq."+d.id,{data:f.get("d"),horario:f.get("h")});go(view)},()=>{
@@ -749,6 +771,9 @@ const A={
     ask("Novo usuário",`<label>Nome<input name="n" required></label><label>E-mail (será o login)<input name="e" type="email" required></label><label>Senha provisória (mín. 8)<input name="s" type="text" minlength="8" required></label><label>Nível<select name="t" id="ut">${tipos.map(t=>`<option value="${t}">${NIVEL[t]}</option>`).join("")}</select></label><label id="ual">Agência<select name="a" id="ua"><option value="">Selecione</option>${AGS.map(a=>`<option value="${a.id}">${esc(a.nome_fantasia)}</option>`).join("")}</select></label>`,"Criar usuário",async f=>{
       const t=f.get("t");await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:t,agencia_id:t==="agencia"?f.get("a"):null});go("usr")},()=>{const sy=()=>{const v=$("#ut").value==="agencia"?"":"none";$("#ual").style.display=v;($("#ugg")||{style:{}}).style.display=v};$("#ut").onchange=sy;sy()})},
   usAg:d=>ask("Alterar agência do usuário",`<label>Agência${sel("a",AGS.map(a=>`<option value="${a.id}"${a.id===RES.us[d.id].agencia_id?" selected":""}>${esc(a.nome_fantasia)}</option>`).join(""))}</label>`,"Salvar",async f=>{await upd("usuarios","id=eq."+d.id,{agencia_id:f.get("a")});go("usr")}),
+  pNovo:()=>ask("Novo atrativo",`<label>Nome do atrativo<input name="n" required></label><label>Endereço (letras minúsculas, números e hífen)<input name="sl" pattern="[a-z0-9][a-z0-9\\-]{1,40}" required placeholder="ex.: rio-azul"></label><h3>Primeiro acesso (Criador)</h3><label>Nome<input name="cn" required></label><label>E-mail (login)<input name="ce" type="email" required></label><label>Senha provisória (mín. 8)<input name="cs" type="text" minlength="8" required></label>`,"Criar atrativo",async f=>{await fnUsr({acao:"criar_atrativo",nome:f.get("n"),slug:f.get("sl"),criador_nome:f.get("cn"),criador_email:f.get("ce"),criador_senha:f.get("cs")});go("p_atr");setTimeout(()=>msg("Atrativo criado. Entre como o Criador dele para definir tarifa, horários, agências e identidade visual."),400)}),
+  pRec:d=>{const x=RES.atr[d.id];ask("Recursos de "+esc(x.nome),RECS.map(([k,n])=>`<label class="chk"><input type="checkbox" name="${k}" ${x.recursos[k]!==false?"checked":""}> ${n}</label>`).join(""),"Salvar",async f=>{const o={};RECS.forEach(([k])=>o[k]=!!f.get(k));await upd("atrativos","id=eq."+d.id,{recursos:o});if(d.id===ME.atrativo_id){ATR.recursos=o;header()}go("p_atr")})},
+  pAtivo:async d=>{try{if(d.id===ME.atrativo_id)throw new Error("Você não pode suspender o atrativo em que está logado.");await upd("atrativos","id=eq."+d.id,{ativo:d.v!=="true"});go("p_atr")}catch(e){msg(e.message,1)}},
   aNovoUsr:()=>ask("Novo usuário da agência",`<label>Nome<input name="n" required></label><label>E-mail (será o login)<input name="e" type="email" required></label><label>Senha provisória (mín. 8)<input name="s" type="text" minlength="8" required></label>`,"Criar usuário",async f=>{await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:"agencia",agencia_id:ME.agencia_id});go("a_usr")}),
   usSenha:d=>ask("Nova senha para "+esc(RES.us[d.id].nome),`<label>Senha (mín. 8)<input name="s" type="text" minlength="8" required></label>`,"Salvar",async f=>{await fnUsr({acao:"senha",id:d.id,senha:f.get("s")})}),
   usAtivo:async d=>{try{await fnUsr({acao:"ativo",id:d.id,ativo:d.v!=="true"});go(agGer()?"a_usr":"usr")}catch(e){msg(e.message,1)}},
