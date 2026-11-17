@@ -121,6 +121,7 @@ dialog img{max-width:100%;border-radius:10px}
 .side .drop.open,.side .dd.act .drop{display:block}
 .side .drop button{color:var(--muted);font-weight:600}.side .drop button.on{background:var(--soft);color:var(--ac)}
 .tg{display:none}
+.ola{margin:14px 0 2px;font-size:1.5rem}
 @media (min-width:900px){.top .nav{display:none}.top .tg{display:block;flex:1}.layout:not(.cfg) .side{display:block}.top .in{max-width:1280px}}
 .top #logo{max-height:34px;max-width:120px;object-fit:contain}
 .uinfo{font-size:.75rem;line-height:1.2;color:var(--muted);text-align:right}.uinfo b{color:var(--text)}
@@ -181,6 +182,7 @@ const brd=d=>d?String(d).slice(0,10).split("-").reverse().join("/"):"";
 const hh=t=>String(t).slice(0,5);
 const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const hoje=()=>ymd(new Date());
+const saudacao=()=>{const h=new Date().getHours();return h<12?"Bom dia":h<18?"Boa tarde":"Boa noite"};
 const somaDias=(s,n)=>{const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return ymd(d)};
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const NIVEL={criador:"Criador",gerente:"Gerente",atendente:"Atendente",financeiro:"Financeiro",agencia:"Agência"};
@@ -323,7 +325,7 @@ const okV=v=>!RECMAP[v]||rec(RECMAP[v]);
 const menuAtual=()=>MENU[agGer()?"agenciaGer":ME.tipo].map(it=>Array.isArray(it[1])?[it[0],it[1].filter(([v])=>okV(v))]:it).filter(it=>Array.isArray(it[1])?it[1].length:okV(it[0]));
 const navHtml=()=>menuAtual().map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
-  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<span class="tg"></span><div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 16/11 21h55</div></div></div>`}</div>`;
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<span class="tg"></span><div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 16/11 22h05</div></div></div>`}</div>`;
   const lay=$(".layout");if(lay)lay.classList.toggle("cfg",!!cfgMode);
   const sd=$("#side");if(sd)sd.innerHTML=cfgMode?"":`<div class="nav" id="snav">${navHtml()}</div>`;
   aplicaPers();
@@ -455,7 +457,7 @@ async function vHome(){
   const pen=res.filter(r=>r.status==="pendente");
   const penH=pen.length?pen.slice(0,6).map(r=>`<div class="li"><span><b>${hh(r.horario)}</b> · ${esc(agNome(r.agencia_id))} · ${esc(r.turista)} · ${qt(r)} pessoa(s)</span><button class="mini" data-a="hconf" data-id="${r.id}">Confirmar</button></div>`).join("")+(pen.length>6?`<p class="more">e mais ${pen.length-6}</p>`:""):vazio("Tudo confirmado.");
   const chips=ab.map(v=>{const c=v.livres===0?"lot":v.livres<=2?"low":"ok";return `<button class="chip ${c}" data-a="nav" data-v="agenda"><b>${hh(v.horario)}</b><small>${v.livres?v.livres+" livres":"lotado"}</small></button>`}).join("");
-  let h=`<p class="rdata">Painel do dia ${brd(d)}</p>
+  let h=`<h2 class="ola">${saudacao()}, ${esc((ME.nome||"").trim().split(/\s+/)[0])}!</h2><p class="rdata">Painel do dia ${brd(d)}</p>
   <div class="atalhos">${ops?`<button class="pri" data-a="nova">Nova reserva</button><button class="mini" data-a="nav" data-v="agenda">Mapa de vagas</button>`:""}${f?`<button class="${ops?"mini":"pri"}" data-a="nav" data-v="f_cc">Conta corrente</button>`:""}</div>
   ${ops?`<div class="kpis">${kpi("Reservas",res.length)}${kpi("Pessoas",pes)}${kpi("Vagas livres",livres)}</div>
   <div class="pgrid">${pcard("Próximo horário",cxProx)}${pcard("Aguardando confirmação"+(pen.length?` <span class="badge bq">${pen.length}</span>`:""),penH)}${pcard("Vagas por horário",`<div class="chips">${chips||vazio("Sem horários abertos.")}</div>`,"wide")}</div>`:""}`;
