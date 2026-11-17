@@ -15,7 +15,7 @@
 :root{--bg:#f1f7f3;--card:#fff;--bar:#eef2f6;--text:#1b2430;--muted:#64748b;--ac:#16a34a;--actx:#fff;--soft:#dcf5e3;--red:#b42318;--warn:#b45309;--shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.07)}
 @media (prefers-color-scheme:dark){:root{--bg:#0e1511;--card:#171c24;--bar:#222a35;--text:#e7ecf3;--muted:#94a3b8;--ac:#3ec96b;--actx:#062010;--soft:#16301f;--red:#ff9b8f;--warn:#fbbf24;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.35)}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-top:env(safe-area-inset-top)}
+body{margin:0;background:var(--bg) radial-gradient(900px 520px at 88% -8%,color-mix(in srgb,var(--ac) 17%,transparent),transparent) no-repeat fixed,radial-gradient(760px 520px at -6% 108%,color-mix(in srgb,var(--ac) 13%,transparent),transparent) no-repeat fixed;background-image:radial-gradient(900px 520px at 88% -8%,color-mix(in srgb,var(--ac) 17%,transparent),transparent),radial-gradient(760px 520px at -6% 108%,color-mix(in srgb,var(--ac) 13%,transparent),transparent),radial-gradient(color-mix(in srgb,var(--text) 8%,transparent) 1px,transparent 1.6px);background-size:auto,auto,26px 26px;background-attachment:fixed;background-color:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-top:env(safe-area-inset-top)}
 button{font:inherit;cursor:pointer}
 input,select,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid rgba(100,116,139,.4);border-radius:10px;padding:8px 10px;max-width:100%}
 input:focus,select:focus{outline:2px solid var(--ac);outline-offset:1px}
@@ -326,7 +326,7 @@ const okV=v=>!RECMAP[v]||rec(RECMAP[v]);
 const menuAtual=()=>MENU[agGer()?"agenciaGer":ME.tipo].map(it=>Array.isArray(it[1])?[it[0],it[1].filter(([v])=>okV(v))]:it).filter(it=>Array.isArray(it[1])?it[1].length:okV(it[0]));
 const navHtml=()=>menuAtual().map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
-  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<span class="tg"></span><div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 16/11 22h15</div></div></div>`}</div>`;
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<span class="tg"></span><div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 16/11 22h30</div></div></div>`}</div>`;
   const lay=$(".layout");if(lay)lay.classList.toggle("cfg",!!cfgMode);
   const sd=$("#side");if(sd)sd.innerHTML=cfgMode?"":`<div class="nav" id="snav">${navHtml()}</div>`;
   aplicaPers();
@@ -673,7 +673,7 @@ function aplicaPers(){
   const p=PERS||{},r=document.documentElement.style;
   if(p.cor){r.setProperty("--ac",p.cor);r.setProperty("--soft","color-mix(in srgb,"+p.cor+" 16%,transparent)")}else{r.removeProperty("--ac");r.removeProperty("--soft")}
   if(p.fundo)r.setProperty("--bg",p.fundo);else r.removeProperty("--bg");
-  document.body.style.backgroundImage=p.bg?`url(${p.bg})`:"";
+  document.body.style.backgroundImage=p.bg?`url(${p.bg})`:"";document.body.style.backgroundSize=p.bg?"cover":"";document.body.style.backgroundPosition=p.bg?"center":"";
   const lg=$("#logo");if(lg){lg.hidden=!p.logo;if(p.logo)lg.src=p.logo}
 }
 function vcUsuarios(){
