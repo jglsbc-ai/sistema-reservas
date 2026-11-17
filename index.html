@@ -111,6 +111,17 @@ dialog img{max-width:100%;border-radius:10px}
 .nav{flex-wrap:wrap;overflow:visible}
 .dd{position:relative}
 .nav .drop{left:0;right:auto;top:100%}
+.layout{max-width:1280px;margin:0 auto;display:flex;align-items:flex-start;gap:8px}
+.layout .wrap{flex:1;min-width:0;margin:0;max-width:none}
+.side{display:none;width:230px;flex:none;position:sticky;top:64px;padding:14px 14px 0 0}
+.side .nav{flex-direction:column;flex-wrap:nowrap;overflow:visible;gap:2px}
+.side .nav>button,.side .ddb{display:block;width:100%;text-align:left;padding:10px 14px}
+.side .dd{position:static}
+.side .drop{position:static;display:none;box-shadow:none;border:0;background:transparent;padding:0 0 0 14px;min-width:0}
+.side .drop.open,.side .dd.act .drop{display:block}
+.side .drop button{color:var(--muted);font-weight:600}.side .drop button.on{background:var(--soft);color:var(--ac)}
+.tg{display:none}
+@media (min-width:900px){.top .nav{display:none}.top .tg{display:block;flex:1}.layout:not(.cfg) .side{display:block}.top .in{max-width:1280px}}
 .top #logo{max-height:34px;max-width:120px;object-fit:contain}
 .uinfo{font-size:.75rem;line-height:1.2;color:var(--muted);text-align:right}.uinfo b{color:var(--text)}
 .dia{background:var(--card);border:1px solid color-mix(in srgb,var(--ac) 45%,var(--bar));border-radius:14px;margin:10px 0;overflow:hidden}
@@ -312,19 +323,21 @@ const okV=v=>!RECMAP[v]||rec(RECMAP[v]);
 const menuAtual=()=>MENU[agGer()?"agenciaGer":ME.tipo].map(it=>Array.isArray(it[1])?[it[0],it[1].filter(([v])=>okV(v))]:it).filter(it=>Array.isArray(it[1])?it[1].length:okV(it[0]));
 const navHtml=()=>menuAtual().map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
-  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 16/11 21h20</div></div></div>`}</div>`;
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<span class="tg"></span><div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 16/11 21h45</div></div></div>`}</div>`;
+  const lay=$(".layout");if(lay)lay.classList.toggle("cfg",!!cfgMode);
+  const sd=$("#side");if(sd)sd.innerHTML=cfgMode?"":`<div class="nav" id="snav">${navHtml()}</div>`;
   aplicaPers();
 }
 function montaApp(){
-  $("#app").innerHTML=`<div class="top" id="hdr"></div><div class="wrap"><div id="main"></div></div>`;
+  $("#app").innerHTML=`<div class="top" id="hdr"></div><div class="layout"><div class="wrap"><div id="main"></div></div><aside class="side" id="side"></aside></div>`;
   header();go(view);
 }
 async function go(v){
   const c=v.startsWith("c_");view=v;
   if(c!==cfgMode){cfgMode=c;header()}
   document.querySelectorAll(".drop.open").forEach(x=>x.classList.remove("open"));
-  document.querySelectorAll("#nav button[data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
-  document.querySelectorAll("#nav .dd").forEach(d=>d.querySelector(".ddb").classList.toggle("on",!!d.querySelector(`[data-v="${v}"]`)));
+  document.querySelectorAll("#nav button[data-v],#snav button[data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  document.querySelectorAll("#nav .dd,#snav .dd").forEach(d=>{const t=!!d.querySelector(`[data-v="${v}"]`);d.querySelector(".ddb").classList.toggle("on",t);d.classList.toggle("act",t)});
   const m=$("#main");m.innerHTML=`<p class="vazio">Carregando…</p>`;
   try{await VIEWS[v]()}catch(e){m.innerHTML=`<p class="vazio err">${esc(e.message)}</p>`}
 }
