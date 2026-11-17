@@ -581,7 +581,18 @@ async function vAgCad(){
 }
 async function vAgs(){
   AGS=await rest("agencias?select=*&order=nome_fantasia");
-  $("#main").innerHTML=`<h2>Lista de agências</h2><div class="msg" id="msg"></div>`+(AGS.length?tab(["Agência","Status","",""],AGS.map(a=>[esc(a.nome_fantasia),`<span class="st st-${a.status}">${a.status}</span>`,`<span class="ac"><button data-a="bloq" data-id="${a.id}" data-b="${a.bloqueada}">${a.bloqueada?"Desbloquear":"Bloquear"}</button><button data-a="agrel" data-id="${a.id}">Relatório</button><button data-a="agEd" data-id="${a.id}">Editar</button></span>`,""])):vazio("Nenhuma agência cadastrada."));
+  $("#main").innerHTML=`<h2>Lista de agências</h2><div class="msg" id="msg"></div>`+(AGS.length?tab(["Agência","Status","",""],AGS.map(a=>[esc(a.nome_fantasia),`<span class="st st-${a.status}">${a.status}</span>`,`<span class="ac"><button data-a="bloq" data-id="${a.id}" data-b="${a.bloqueada}">${a.bloqueada?"Desbloquear":"Bloquear"}</button><button data-a="agrel" data-id="${a.id}">Relatório</button>${gestao()?`<button data-a="agEd" data-id="${a.id}">Editar</button>`:""}</span>`,""])):vazio("Nenhuma agência cadastrada."));
+}
+async function vAgEdit(){
+  const id=sub.agid;AGS=await rest("agencias?select=*&order=nome_fantasia");const a=AGS.find(x=>x.id===id);
+  if(!a){$("#main").innerHTML=vazio("Agência não encontrada.");return}
+  const us=await rest("usuarios?select=*&agencia_id=eq."+id+"&order=nome");RES.us=Object.fromEntries(us.map(u=>[u.id,u]));
+  $("#main").innerHTML=`<button class="sec noprint" data-a="ir" data-v="ags">← Lista de agências</button><h2>Editar agência</h2><div class="card"><form id="af" class="fm">${campoAg(a)}<p class="err" id="merr"></p><button class="pri">Salvar dados</button></form></div>
+  <h3>Usuários da agência</h3><div class="msg" id="msg"></div><div class="atalhos"><button class="pri" data-a="agNovoUsr">+ Novo usuário</button></div>`+
+  (us.length?tab(["Nome","E-mail (login)","Nível","Status",""],us.map(u=>[esc(u.nome),esc(u.email),`<select data-niv="${u.id}"><option value="0"${u.gerente_agencia?"":" selected"}>Usuário (só reservas)</option><option value="1"${u.gerente_agencia?" selected":""}>Gerente da agência</option></select>`,`<span class="st st-${u.ativo?"ativa":"inativa"}">${u.ativo?"ativo":"desativado"}</span>`,`<span class="ac"><button data-a="usSenha" data-id="${u.id}">Nova senha</button><button data-a="usAtivo" data-id="${u.id}" data-v="${u.ativo}">${u.ativo?"Desativar":"Ativar"}</button></span>`])):vazio("Esta agência ainda não tem usuários."));
+  revelaAg();
+  $("#af").onsubmit=async e=>{e.preventDefault();try{await upd("agencias","id=eq."+id,lerAg(new FormData(e.target)));AGS=await rest("agencias?select=*&order=nome_fantasia");$("#merr").textContent="";msg("Dados da agência salvos.")}catch(er){$("#merr").textContent=er.message}};
+  document.querySelectorAll("[data-niv]").forEach(sl=>sl.onchange=async()=>{try{await upd("usuarios","id=eq."+sl.dataset.niv,{gerente_agencia:sl.value==="1"});msg("Nível atualizado.")}catch(er){msg(er.message,1);go("ag_edit")}});
 }
 async function vAgRel(){
   const id=sub.agrel;const [s,rs]=await Promise.all([rest("saldo_por_agencia?select=*&agencia_id=eq."+id),rest(`reservas?select=*&agencia_id=eq.${id}&order=data.desc,horario&limit=500`)]);
@@ -708,7 +719,7 @@ async function vHomeAg(){
 }
 const VIEWS={home:()=>fin()?vHome():vHomeAg(),agenda:vAgenda,reservas:vReservas,registros:vRegistros,estat:vEstat,mp:vMp,p_atr:vPAtr,a_cc:vACC,a_fat:vFaturas,a_usr:vAUsr,
   f_faturas:vFaturas,f_gerar:vGerar,f_valor:vValor,f_tarifa:vTarifa,f_saldos:vSaldos,f_vendas:vVendas,f_cc:vCC,f_mp:vMpConf,
-  ag_cad:vAgCad,ags:vAgs,ag_rel:vAgRel,
+  ag_cad:vAgCad,ags:vAgs,ag_edit:vAgEdit,ag_rel:vAgRel,
   c_menu:vcMenu,c_tema:vcTema,c_limite:vcLimite,c_atv:vcAtv,c_alertas:vcAlertas,c_pers:vcPers,c_horarios:vcHorarios,c_usuarios:vcUsuarios,c_ucad:vcUcad,c_ulist:vcUlist,c_ulista:vcUlista,c_uedit:vcUedit};
 
 /* ================= Ações (cliques) ================= */
@@ -764,7 +775,8 @@ const A={
 
   /* agências */
   agNova:()=>ask("Nova agência",campoAg(),"Cadastrar",async f=>{await ins("agencias",lerAg(f));go("ags")}),
-  agEd:d=>{const a=AGS.find(x=>x.id===d.id);ask("Editar agência",campoAg(a),"Salvar",async f=>{await upd("agencias","id=eq."+d.id,lerAg(f));go("ags")})},
+  agEd:d=>{sub.agid=d.id;go("ag_edit")},
+  agNovoUsr:()=>ask("Novo usuário de "+esc(agNome(sub.agid)),`<label>Nome<input name="n" required></label><label>E-mail (será o login)<input name="e" type="email" required></label><label>Senha provisória (mín. 8)<input name="s" type="text" minlength="8" required></label><label>Nível<select name="g"><option value="0">Usuário (só reservas)</option><option value="1">Gerente da agência (financeiro, multiponto e usuários)</option></select></label>`,"Criar usuário",async f=>{await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:"agencia",agencia_id:sub.agid,gerente_agencia:f.get("g")==="1"});go("ag_edit")}),
 
   /* usuários */
   usNovo:()=>{const tipos=ME.tipo==="criador"?["agencia","atendente","gerente","criador"]:["agencia","atendente"];
@@ -776,7 +788,7 @@ const A={
   pAtivo:async d=>{try{if(d.id===ME.atrativo_id)throw new Error("Você não pode suspender o atrativo em que está logado.");await upd("atrativos","id=eq."+d.id,{ativo:d.v!=="true"});go("p_atr")}catch(e){msg(e.message,1)}},
   aNovoUsr:()=>ask("Novo usuário da agência",`<label>Nome<input name="n" required></label><label>E-mail (será o login)<input name="e" type="email" required></label><label>Senha provisória (mín. 8)<input name="s" type="text" minlength="8" required></label>`,"Criar usuário",async f=>{await fnUsr({acao:"criar",nome:f.get("n"),email:f.get("e"),senha:f.get("s"),tipo:"agencia",agencia_id:ME.agencia_id});go("a_usr")}),
   usSenha:d=>ask("Nova senha para "+esc(RES.us[d.id].nome),`<label>Senha (mín. 8)<input name="s" type="text" minlength="8" required></label>`,"Salvar",async f=>{await fnUsr({acao:"senha",id:d.id,senha:f.get("s")})}),
-  usAtivo:async d=>{try{await fnUsr({acao:"ativo",id:d.id,ativo:d.v!=="true"});go(agGer()?"a_usr":"usr")}catch(e){msg(e.message,1)}},
+  usAtivo:async d=>{try{await fnUsr({acao:"ativo",id:d.id,ativo:d.v!=="true"});go(["ag_edit","a_usr"].includes(view)?view:"usr")}catch(e){msg(e.message,1)}},
 
   /* configurações */
   salvaHor:async()=>{try{const mud=[...document.querySelectorAll("[data-h]")].filter(c=>c.checked!==HOR.find(h=>h.id===c.dataset.h).ativo);await Promise.all(mud.map(c=>upd("horarios_operacao","id=eq."+c.dataset.h,{ativo:c.checked})));msg(mud.length?"Horários salvos.":"Nada mudou.");HOR=await rest("horarios_operacao?select=*&atividade_id=eq."+ATV.id+"&order=horario")}catch(e){msg(e.message,1)}},
