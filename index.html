@@ -123,6 +123,7 @@ dialog img{max-width:100%;border-radius:10px}
 .side .drop.open,.side .dd.act .drop{display:block}
 .side .drop button{color:var(--muted);font-weight:600}.side .drop button.on{background:var(--soft);color:var(--ac)}
 .tg{display:none}
+.pxl{white-space:nowrap;margin-right:8px;color:var(--muted)}.pxl b{color:var(--text);font-weight:700}
 .marca{display:none;position:fixed;left:20px;bottom:14px;width:100px;z-index:1;pointer-events:none;opacity:.95}
 @media (min-width:900px) and (min-height:640px){.marca{display:block}}
 .ola{margin:14px 0 2px;font-size:1.5rem}
@@ -182,6 +183,7 @@ const KEY="sb_publishable_IFPdMmyIfOSfnwo5-gtnvw_eXz0Yn5B";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const brl=n=>Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const paxTxt=r=>`<span class="pxl">Adulto <b>${r.adultos}</b></span> <span class="pxl">Chd <b>${r.criancas}</b></span>`+(r.cortesias>0&&gestao()&&rec("cortesia")?` <span class="pxl">Cort <b>${r.cortesias}</b></span>`:"");
 const brd=d=>d?String(d).slice(0,10).split("-").reverse().join("/"):"";
 const hh=t=>String(t).slice(0,5);
 const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -329,7 +331,7 @@ const okV=v=>!RECMAP[v]||rec(RECMAP[v]);
 const menuAtual=()=>MENU[agGer()?"agenciaGer":ME.tipo].map(it=>Array.isArray(it[1])?[it[0],it[1].filter(([v])=>okV(v))]:it).filter(it=>Array.isArray(it[1])?it[1].length:okV(it[0]));
 const navHtml=()=>menuAtual().map(([k,t])=>Array.isArray(t)?`<div class="dd"><button class="ddb" data-a="dd">${k} ▾</button><div class="drop">${t.map(([v,n])=>`<button data-a="nav" data-v="${v}">${n}</button>`).join("")}</div></div>`:`<button data-a="nav" data-v="${k}">${t}</button>`).join("");
 function header(){
-  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<span class="tg"></span><div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 16/11 23h55</div></div></div>`}</div>`;
+  $("#hdr").innerHTML=`<div class="in"><span class="brand">${esc(ATV.nome)}</span>${cfgMode?'<span class="grow"></span>':`<span class="tg"></span><div class="nav" id="nav">${navHtml()}</div>`}${gestao()?"":`<span class="uinfo"><b>${esc(ME.nome)}</b><br>${ME.agencia_id?esc(agNome(ME.agencia_id)):NIVEL[ME.tipo]}</span>`}<img id="logo" alt="Logo" hidden>${cfgMode?'<button class="pri" data-a="home">⌂ Home</button>':`<div class="kb"><button data-a="menu" aria-label="Menu">⋮</button><div class="drop" id="kd"><div class="who">${esc(ME.nome)}<br>${NIVEL[ME.tipo]}${ME.agencia_id?" · "+esc(agNome(ME.agencia_id)):""}</div>${gestao()?'<button data-a="cfg">Configurações</button>':""}${PLAT?'<button data-a="ir" data-v="p_atr">Atrativos (plataforma)</button>':""}<button data-a="senha">Alterar senha</button>${("Notification" in window)?'<button data-a="notif">Ativar notificações</button>':""}<button data-a="sair">Sair</button><div class="who" style="font-size:.75rem;opacity:.6">Versão 17/11 00h05</div></div></div>`}</div>`;
   const lay=$(".layout");if(lay)lay.classList.toggle("cfg",!!cfgMode);
   const sd=$("#side");if(sd)sd.innerHTML=cfgMode?"":`<div class="nav" id="snav">${navHtml()}</div>`;
   aplicaPers();
@@ -398,7 +400,7 @@ async function vReservas(){
 }
 async function lista(){
   const rs=await rpc("buscar_reservas",{p_inicio:sub.ini,p_fim:sub.fim,p_busca:sub.q||null});
-  $("#res").innerHTML=rs.length?`<div class="scroll"><table class="tb"><thead><tr><th>Nº</th><th>Data</th><th>Hora</th><th>Turista</th>${ME.tipo!=="agencia"?"<th>Agência</th>":""}<th>Pax</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead><tbody>${rs.map(r=>`<tr><td>${r.numero}</td><td>${brd(r.data)}</td><td>${hh(r.horario)}</td><td>${esc(r.turista)}</td>${ME.tipo!=="agencia"?`<td>${esc(agNome(r.agencia_id))}</td>`:""}<td>${r.adultos}+${r.criancas}+${r.cortesias}</td><td class="num">${brl(r.valor_total)}</td><td><span class="st st-${r.status}">${r.status}</span></td><td class="ac">${acoes(r)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhuma reserva encontrada.</p>`;
+  $("#res").innerHTML=rs.length?`<div class="scroll"><table class="tb"><thead><tr><th>Nº</th><th>Data</th><th>Hora</th><th>Turista</th>${ME.tipo!=="agencia"?"<th>Agência</th>":""}<th>Pax</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead><tbody>${rs.map(r=>`<tr><td>${r.numero}</td><td>${brd(r.data)}</td><td>${hh(r.horario)}</td><td>${esc(r.turista)}</td>${ME.tipo!=="agencia"?`<td>${esc(agNome(r.agencia_id))}</td>`:""}<td>${paxTxt(r)}</td><td class="num">${brl(r.valor_total)}</td><td><span class="st st-${r.status}">${r.status}</span></td><td class="ac">${acoes(r)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="vazio">Nenhuma reserva encontrada.</p>`;
 }
 
 /* ================= Multiponto ================= */
@@ -618,7 +620,7 @@ async function vAgEdit(){
 async function vAgRel(){
   const id=sub.agrel;const [s,rs]=await Promise.all([rest("saldo_por_agencia?select=*&agencia_id=eq."+id),rest(`reservas?select=*&agencia_id=eq.${id}&order=data.desc,horario&limit=500`)]);
   const x=s[0]||{},ativas=rs.filter(r=>r.status!=="cancelada"),pess=ativas.reduce((a,r)=>a+r.adultos+r.criancas+r.cortesias,0),vend=ativas.reduce((a,r)=>a+Number(r.valor_total),0);
-  $("#main").innerHTML=`<button class="sec noprint" data-a="ir" data-v="ags">← Lista de agências</button><h2>Relatório — ${esc(agNome(id))}</h2><p class="sub" style="text-align:left">${x.bloqueada?"Bloqueada":"Ativa"}</p><div class="kpis">${kpi("Reservas",ativas.length)}${kpi("Pessoas",pess)}${kpi("Vendas",brl(vend))}${kpi("Faturado",brl(x.debitos))}${kpi("Recebido",brl(x.creditos))}${kpi("Saldo",brl(x.saldo))}</div>`+(rs.length?tab(["Data","Horário","Nº","Turista","Pessoas","Valor","Status"],rs.map(r=>[brd(r.data),hh(r.horario),r.numero,esc(r.turista),`${r.adultos}+${r.criancas}+${r.cortesias}`,brl(r.valor_total),`<span class="st st-${r.status}">${r.status}</span>`])):vazio("Nenhuma reserva para esta agência."))+`<p class="tot noprint"><button class="pri" data-a="imprimir">Imprimir / salvar em PDF</button></p>`;
+  $("#main").innerHTML=`<button class="sec noprint" data-a="ir" data-v="ags">← Lista de agências</button><h2>Relatório — ${esc(agNome(id))}</h2><p class="sub" style="text-align:left">${x.bloqueada?"Bloqueada":"Ativa"}</p><div class="kpis">${kpi("Reservas",ativas.length)}${kpi("Pessoas",pess)}${kpi("Vendas",brl(vend))}${kpi("Faturado",brl(x.debitos))}${kpi("Recebido",brl(x.creditos))}${kpi("Saldo",brl(x.saldo))}</div>`+(rs.length?tab(["Data","Horário","Nº","Turista","Pessoas","Valor","Status"],rs.map(r=>[brd(r.data),hh(r.horario),r.numero,esc(r.turista),`${paxTxt(r)}`,brl(r.valor_total),`<span class="st st-${r.status}">${r.status}</span>`])):vazio("Nenhuma reserva para esta agência."))+`<p class="tot noprint"><button class="pri" data-a="imprimir">Imprimir / salvar em PDF</button></p>`;
 }
 
 /* ================= Configurações (tela própria) ================= */
